@@ -1,6 +1,7 @@
 from openai import OpenAI
 from core.config import settings
 from ai.prompt_template import PROMPT_TEMPLATE
+import asyncio
 
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
@@ -14,9 +15,13 @@ async def generate_meal_plan(request):
         fats=request.macros.fats
     )
 
-    response = client.chat.completions.create(
+    response = await asyncio.to_thread(
+        client.chat.completions.create,
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": prompt}]
     )
 
-    return response.choices[0].message["content"]
+    try:
+        return response.choices[0].message.content
+    except (IndexError, AttributeError) as e:
+        raise RuntimeError("Failed to generate meal plan: invalid response structure") from e
