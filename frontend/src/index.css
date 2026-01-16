@@ -1,4 +1,6 @@
-/* @import "./fonts.css"; */
+/* @import "../src/styles/fonts.css";
+@import "../src/styles/theme.css";
+@import "tailwindcss"; */
 
 /* Reset & Base Styles */
 * {
