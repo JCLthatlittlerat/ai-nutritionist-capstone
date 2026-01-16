@@ -96,7 +96,7 @@ export function SignUp({ onNavigate, onSignUp }) {
       handleSignUp();
     }
   };
-
+// examine the length of the password and assign a strength level
   const passwordStrength = (password) => {
     if (!password) return { strength: 0, label: '', color: '' };
     
@@ -144,7 +144,7 @@ export function SignUp({ onNavigate, onSignUp }) {
                 <Input
                   id="fullName"
                   type="text"
-                  placeholder="John Smith"
+                  placeholder="Olyad Negero"
                   className={`pl-10 ${errors.fullName ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                   value={formData.fullName}
                   onChange={(e) => {
@@ -165,6 +165,7 @@ export function SignUp({ onNavigate, onSignUp }) {
                 <Check className="w-5 h-5 text-emerald-600" />
               </div>
               <div>
+                {/* maybe later add account type for users */}
                 <p className="text-sm font-medium text-emerald-900">Account Type</p>
                 <p className="text-xs text-emerald-700">Fitness Coach</p>
               </div>
@@ -295,8 +296,11 @@ export function SignUp({ onNavigate, onSignUp }) {
                     setAcceptedTerms(checked);
                     if (errors.terms && checked) setErrors({ ...errors, terms: '' });
                   }}
-                  className="mt-1"
+                  className="checkbox mt-1"
+                  // style={{backgroundColor:'red', height:'30px', width:'30px'}}
                 />
+                {/* <Checkbox style={{backgroundColor:'red', height:'30px', width:'30px'}}/> */}
+                {/* <p>me here</p> */}
                 <Label htmlFor="terms" className="text-sm leading-relaxed cursor-pointer">
                   I agree to the{' '}
                   <button

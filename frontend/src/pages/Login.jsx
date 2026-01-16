@@ -156,6 +156,7 @@ export function Login({ onNavigate, onLogin }) {
                   id="remember"
                   checked={rememberMe}
                   onCheckedChange={(checked) => setRememberMe(checked)}
+                  className='checkbox'
                 />
                 <Label htmlFor="remember" className="text-sm cursor-pointer">
                   Remember me

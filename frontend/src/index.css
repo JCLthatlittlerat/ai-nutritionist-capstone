@@ -220,6 +220,14 @@ body {
 .mt-1 {
   margin-top: 0.25rem;
 }
+.checkbox {
+  height: 20px;
+  width: 20px;
+  border: 1px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .mt-4 {
   margin-top: 1rem;
