@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { LandingPage } from './pages/LandingPage';
+import LandingPage from './pages/LandingPage';
+// import { LandingPage } from './pages/LandingPage';
 import { Dashboard } from './pages/Dashboard';
 import { CreateMealPlan } from './pages/CreateMealPlan';
 import { MealPlanView } from './pages/MealPlanView';
