@@ -3,7 +3,7 @@ import { Eye, EyeOff, Mail, Lock, User, Loader, Sparkles, Chrome, Check } from '
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { Checkbox } from './components/ui/checkbox';
+import { Checkbox } from '../components/ui/checkbox';
 
 export function SignUp({ onNavigate, onSignUp }) {
   const [showPassword, setShowPassword] = useState(false);

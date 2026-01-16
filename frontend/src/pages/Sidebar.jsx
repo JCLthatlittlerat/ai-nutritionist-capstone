@@ -1,5 +1,5 @@
 import { LayoutDashboard, Plus, Users, History, Settings, Sparkles, LogOut } from 'lucide-react';
-import { Button } from './ui/button';
+import { Button } from '../components/ui/Button';
 
 export function Sidebar({ currentPage, onNavigate, onLogout }) {
   const navItems = [
