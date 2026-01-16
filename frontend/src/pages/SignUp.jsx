@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, User, Loader, Sparkles, Chrome, Check } from 'lucide-react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Checkbox } from './ui/checkbox';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Checkbox } from './components/ui/checkbox';
 
 export function SignUp({ onNavigate, onSignUp }) {
   const [showPassword, setShowPassword] = useState(false);
