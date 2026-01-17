@@ -1,6 +1,7 @@
 /* @import "../src/styles/fonts.css";
 @import "../src/styles/theme.css";
 @import "tailwindcss"; */
+@import "./styles/landingpage.css";
 
 /* Reset & Base Styles */
 * {
@@ -10,9 +11,9 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -717,15 +718,20 @@ body {
 
 /* Shadows */
 .shadow-md {
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.8),
+    0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
 .shadow-lg {
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 .shadow-xl {
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1),
+  box-shadow:
+    0 20px 25px -5px rgb(0 0 0 / 0.1),
     0 8px 10px -6px rgb(0 0 0 / 0.1);
 }
 
@@ -734,7 +740,8 @@ body {
 }
 
 .shadow-emerald-200 {
-  box-shadow: 0 10px 15px -3px rgba(167, 243, 208, 0.4),
+  box-shadow:
+    0 10px 15px -3px rgba(167, 243, 208, 0.4),
     0 4px 6px -4px rgba(167, 243, 208, 0.3);
 }
 
@@ -971,11 +978,14 @@ body {
 }
 
 .hover\:shadow-lg:hover {
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 .hover\:shadow-xl:hover {
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1),
+  box-shadow:
+    0 20px 25px -5px rgb(0 0 0 / 0.1),
     0 8px 10px -6px rgb(0 0 0 / 0.1);
 }
 
@@ -1080,7 +1090,8 @@ select:focus {
 .auth-card {
   background-color: #ffffff;
   border-radius: 1rem;
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1),
+  box-shadow:
+    0 20px 25px -5px rgb(0 0 0 / 0.1),
     0 8px 10px -6px rgb(0 0 0 / 0.1);
   border: 1px solid #f1f5f9;
   padding: 2rem;
@@ -1639,7 +1650,8 @@ select:focus {
   gap: 0.5rem;
   cursor: pointer;
   transition: all 150ms;
-  box-shadow: 0 10px 15px -3px rgba(167, 243, 208, 0.4),
+  box-shadow:
+    0 10px 15px -3px rgba(167, 243, 208, 0.4),
     0 4px 6px -4px rgba(167, 243, 208, 0.3);
 }
 
@@ -1701,12 +1713,16 @@ select:focus {
 
 .stat-card {
   border: none;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.1),
+    0 2px 4px -2px rgb(0 0 0 / 0.1);
   transition: box-shadow 200ms;
 }
 
 .stat-card:hover {
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 .plan-item {

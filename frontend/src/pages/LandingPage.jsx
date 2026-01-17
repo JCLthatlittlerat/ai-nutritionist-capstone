@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "../components/ui/Button";
+
 import {
   Card,
   CardContent,
@@ -53,7 +54,7 @@ function LandingPage({ onNavigate }) {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30">
+    <div className="landing-page min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30">
       {/* Header */}
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -67,10 +68,10 @@ function LandingPage({ onNavigate }) {
           </div>
 
           <nav className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => onNavigate("login")}>
+            <Button className="login-btn" variant="ghost" onClick={() => onNavigate("login")}>
               Log In
             </Button>
-            <Button onClick={() => onNavigate("signup")}>
+            <Button className="signup-btn" onClick={() => onNavigate("signup")}>
               Get Started
             </Button>
           </nav>
@@ -96,7 +97,7 @@ function LandingPage({ onNavigate }) {
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <Button
             size="lg"
-            className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white"
+            className=" from-emerald-600 to-teal-600"
             onClick={() => onNavigate("create")}
           >
             Generate Meal Plan
@@ -110,12 +111,12 @@ function LandingPage({ onNavigate }) {
       </section>
 
       {/* Features */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
+      <section className=" features max-w-7xl mx-auto px-6 py-20">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
-              <Card key={index} className="border-none shadow-md">
+              <Card key={index} className="card border-none shadow-md">
                 <CardHeader>
                   <div
                     className={`w-12 h-12 rounded-xl ${feature.bgColor} flex items-center justify-center mb-4`}
