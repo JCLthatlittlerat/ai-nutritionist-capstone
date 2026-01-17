@@ -133,6 +133,10 @@ function LandingPage({ onNavigate }) {
           })}
         </div>
       </section>
+      {/* footer */}
+        <footer className="text-center mt-8 text-sm text-slate-500">
+          <p>© 2025 AI Nutritionist. Built for professional coaches.</p>
+        </footer>
     </div>
   );
 }
