@@ -34,15 +34,11 @@ export default function App() {
     setIsAuthenticated(false);
     setCurrentPage('landing');
   };
-
-  // Auth pages - no sidebar
-  if (currentPage === 'login') {
-    return <Login onNavigate={handleNavigate} onLogin={handleLogin} />;
-  }
-
-  if (currentPage === 'signup') {
-    return <SignUp onNavigate={handleNavigate} onSignUp={handleSignUp} />;
-  }
+if (!isAuthenticated) {
+  if (currentPage === 'login') return <Login onNavigate={handleNavigate} onLogin={handleLogin} />;
+  if (currentPage === 'signup') return <SignUp onNavigate={handleNavigate} onSignUp={handleSignUp} />;
+  return <LandingPage onNavigate={handleNavigate} />;
+}
 
   // Landing page - no sidebar
   if (currentPage === 'landing') {
