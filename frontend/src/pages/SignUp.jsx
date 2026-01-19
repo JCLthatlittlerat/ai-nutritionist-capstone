@@ -4,6 +4,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Checkbox } from '../components/ui/checkbox';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 export function SignUp({ onNavigate, onSignUp }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -116,24 +117,29 @@ export function SignUp({ onNavigate, onSignUp }) {
   const strength = passwordStrength(formData.password);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 flex items-center justify-center p-4 sm:p-6 animate-fade-in">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950/20 flex items-center justify-center p-4 sm:p-6 animate-fade-in">
       <div className="w-full max-w-md">
+        {/* Theme Toggle - Top Right */}
+        <div className="flex justify-end mb-4">
+          <ThemeToggle />
+        </div>
+        
         {/* Logo */}
         <div className="text-center mb-6 sm:mb-8 animate-slide-up">
           <div className="flex items-center justify-center gap-2 mb-4 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => onNavigate('landing')}>
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-200/50 transition-transform hover:scale-105">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-200/50 dark:shadow-emerald-900/50 transition-transform hover:scale-105">
               <Sparkles className="w-7 h-7 text-white" />
             </div>
             <span className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">AI Nutritionist</span>
           </div>
-          <p className="text-slate-600 text-sm sm:text-base">For Professional Fitness Coaches</p>
+          <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base">For Professional Fitness Coaches</p>
         </div>
 
         {/* Sign Up Card */}
-        <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-6 sm:p-8 animate-scale-in" style={{ animationDelay: '0.1s' }}>
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 p-6 sm:p-8 animate-scale-in" style={{ animationDelay: '0.1s' }}>
           <div className="mb-6">
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">Create Your Coach Account</h1>
-            <p className="text-slate-600 text-sm sm:text-base">Join thousands of coaches transforming their practice</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-2">Create Your Coach Account</h1>
+            <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base">Join thousands of coaches transforming their practice</p>
           </div>
 
           <div className="space-y-5">
@@ -170,32 +176,32 @@ export function SignUp({ onNavigate, onSignUp }) {
                   onClick={() => setAccountType('coach')}
                   className={`p-4 rounded-lg border-2 transition-all hover:shadow-md ${
                     accountType === 'coach'
-                      ? 'border-emerald-500 bg-gradient-to-r from-emerald-50 to-teal-50 shadow-md'
-                      : 'border-slate-200 bg-white hover:border-emerald-300'
+                      ? 'border-emerald-500 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 shadow-md'
+                      : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700/50 hover:border-emerald-300 dark:hover:border-emerald-600'
                   }`}
                 >
                   <div className="flex flex-col items-center gap-2">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
                       accountType === 'coach'
-                        ? 'bg-emerald-100'
-                        : 'bg-slate-100'
+                        ? 'bg-emerald-100 dark:bg-emerald-900/40'
+                        : 'bg-slate-100 dark:bg-slate-600'
                     }`}>
                       <Briefcase className={`w-5 h-5 ${
                         accountType === 'coach'
-                          ? 'text-emerald-600'
-                          : 'text-slate-500'
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-slate-500 dark:text-slate-300'
                       }`} />
                     </div>
                     <div className="text-center">
                       <p className={`text-sm font-semibold ${
                         accountType === 'coach'
-                          ? 'text-emerald-900'
-                          : 'text-slate-700'
+                          ? 'text-emerald-900 dark:text-emerald-300'
+                          : 'text-slate-700 dark:text-slate-300'
                       }`}>Fitness Coach</p>
                       <p className={`text-xs ${
                         accountType === 'coach'
-                          ? 'text-emerald-600'
-                          : 'text-slate-500'
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-slate-500 dark:text-slate-400'
                       }`}>Create meal plans</p>
                     </div>
                   </div>
@@ -207,32 +213,32 @@ export function SignUp({ onNavigate, onSignUp }) {
                   onClick={() => setAccountType('user')}
                   className={`p-4 rounded-lg border-2 transition-all hover:shadow-md ${
                     accountType === 'user'
-                      ? 'border-emerald-500 bg-gradient-to-r from-emerald-50 to-teal-50 shadow-md'
-                      : 'border-slate-200 bg-white hover:border-emerald-300'
+                      ? 'border-emerald-500 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 shadow-md'
+                      : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700/50 hover:border-emerald-300 dark:hover:border-emerald-600'
                   }`}
                 >
                   <div className="flex flex-col items-center gap-2">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
                       accountType === 'user'
-                        ? 'bg-emerald-100'
-                        : 'bg-slate-100'
+                        ? 'bg-emerald-100 dark:bg-emerald-900/40'
+                        : 'bg-slate-100 dark:bg-slate-600'
                     }`}>
                       <UserCircle className={`w-5 h-5 ${
                         accountType === 'user'
-                          ? 'text-emerald-600'
-                          : 'text-slate-500'
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-slate-500 dark:text-slate-300'
                       }`} />
                     </div>
                     <div className="text-center">
                       <p className={`text-sm font-semibold ${
                         accountType === 'user'
-                          ? 'text-emerald-900'
-                          : 'text-slate-700'
+                          ? 'text-emerald-900 dark:text-emerald-300'
+                          : 'text-slate-700 dark:text-slate-300'
                       }`}>User</p>
                       <p className={`text-xs ${
                         accountType === 'user'
-                          ? 'text-emerald-600'
-                          : 'text-slate-500'
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-slate-500 dark:text-slate-400'
                       }`}>Get your meal plan</p>
                     </div>
                   </div>
@@ -299,12 +305,12 @@ export function SignUp({ onNavigate, onSignUp }) {
                       <div
                         key={i}
                         className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                          i < strength.strength ? strength.color : 'bg-slate-200'
+                          i < strength.strength ? strength.color : 'bg-slate-200 dark:bg-slate-700'
                         }`}
                       ></div>
                     ))}
                   </div>
-                  <p className="text-xs text-slate-600">
+                  <p className="text-xs text-slate-600 dark:text-slate-400">
                     Password strength: <span className="font-semibold">{strength.label}</span>
                   </p>
                 </div>
@@ -312,7 +318,7 @@ export function SignUp({ onNavigate, onSignUp }) {
               {errors.password && (
                 <p className="text-sm text-red-600 animate-slide-up">{errors.password}</p>
               )}
-              <p className="text-xs text-slate-500">Must be at least 8 characters</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Must be at least 8 characters</p>
             </div>
 
             {/* Confirm Password */}
@@ -393,7 +399,7 @@ export function SignUp({ onNavigate, onSignUp }) {
 
             {/* Create Account Button */}
             <Button
-              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 h-11 shadow-lg shadow-emerald-200/50 hover:shadow-xl hover:shadow-emerald-200/60 transition-all hover:scale-105"
+              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 h-11 shadow-lg shadow-emerald-200/50 dark:shadow-emerald-900/50 hover:shadow-xl hover:shadow-emerald-200/60 dark:hover:shadow-emerald-900/60 transition-all hover:scale-105"
               onClick={handleSignUp}
               disabled={isLoading}
             >
@@ -410,17 +416,17 @@ export function SignUp({ onNavigate, onSignUp }) {
             {/* Divider */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200"></div>
+                <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-slate-500">or</span>
+                <span className="px-4 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400">or</span>
               </div>
             </div>
 
             {/* Social Sign Up */}
             <Button
               variant="outline"
-              className="w-full h-11 hover:bg-slate-50 hover:border-slate-300 transition-all hover:shadow-md"
+              className="w-full h-11 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all hover:shadow-md"
               onClick={() => {
                 setIsLoading(true);
                 setTimeout(() => {
@@ -435,12 +441,12 @@ export function SignUp({ onNavigate, onSignUp }) {
             </Button>
 
             {/* Login Link */}
-            <div className="text-center pt-4 border-t border-slate-100">
-              <p className="text-sm text-slate-600">
+            <div className="text-center pt-4 border-t border-slate-100 dark:border-slate-700">
+              <p className="text-sm text-slate-600 dark:text-slate-400">
                 Already have an account?{' '}
                 <button
                   onClick={() => onNavigate('login')}
-                  className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors hover:underline"
+                  className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-semibold transition-colors hover:underline"
                 >
                   Log in
                 </button>
@@ -450,7 +456,7 @@ export function SignUp({ onNavigate, onSignUp }) {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-6 sm:mt-8 text-xs sm:text-sm text-slate-500 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+        <div className="text-center mt-6 sm:mt-8 text-xs sm:text-sm text-slate-500 dark:text-slate-400 animate-fade-in" style={{ animationDelay: '0.2s' }}>
           <p>© 2025 AI Nutritionist. Built for professional coaches.</p>
         </div>
       </div>

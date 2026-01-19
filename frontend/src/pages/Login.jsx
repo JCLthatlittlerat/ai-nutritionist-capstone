@@ -4,6 +4,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Checkbox } from '../components/ui/checkbox';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 export function Login({ onNavigate, onLogin }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -67,37 +68,42 @@ export function Login({ onNavigate, onLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950/20 flex items-center justify-center p-4 sm:p-6 animate-fade-in">
       <div className="w-full max-w-md">
+        {/* Theme Toggle - Top Right */}
+        <div className="flex justify-end mb-4">
+          <ThemeToggle />
+        </div>
+        
         {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+        <div className="text-center mb-6 sm:mb-8 animate-slide-up">
+          <div className="flex items-center justify-center gap-2 mb-4 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => onNavigate('landing')}>
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-200/50 dark:shadow-emerald-900/50 transition-transform hover:scale-105">
               <Sparkles className="w-7 h-7 text-white" />
             </div>
-            <span className="text-2xl font-bold text-slate-900">AI Nutritionist</span>
+            <span className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">AI Nutritionist</span>
           </div>
-          <p className="text-slate-600">For Professional Fitness Coaches</p>
+          <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base">For Professional Fitness Coaches</p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-8">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 p-6 sm:p-8 animate-scale-in" style={{ animationDelay: '0.1s' }}>
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-slate-900 mb-2">Welcome Back</h1>
-            <p className="text-slate-600">Sign in to continue to your dashboard</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">Welcome Back</h1>
+            <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base">Sign in to continue to your dashboard</p>
           </div>
 
           <div className="space-y-5">
             {/* Email */}
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 transition-colors" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="coach@example.com"
-                  className={`pl-10 ${errors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                  className={`pl-10 h-11 transition-all ${errors.email ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-emerald-500'}`}
                   value={formData.email}
                   onChange={(e) => {
                     setFormData({ ...formData, email: e.target.value });
@@ -107,7 +113,7 @@ export function Login({ onNavigate, onLogin }) {
                 />
               </div>
               {errors.email && (
-                <p className="text-sm text-red-600 flex items-center gap-1">
+                <p className="text-sm text-red-600 flex items-center gap-1 animate-slide-up">
                   {errors.email}
                 </p>
               )}
@@ -115,14 +121,14 @@ export function Login({ onNavigate, onLogin }) {
 
             {/* Password */}
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 transition-colors" />
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Enter your password"
-                  className={`pl-10 pr-10 ${errors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                  className={`pl-10 pr-10 h-11 transition-all ${errors.password ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-emerald-500'}`}
                   value={formData.password}
                   onChange={(e) => {
                     setFormData({ ...formData, password: e.target.value });
@@ -133,7 +139,7 @@ export function Login({ onNavigate, onLogin }) {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-all hover:scale-110"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -143,7 +149,7 @@ export function Login({ onNavigate, onLogin }) {
                 </button>
               </div>
               {errors.password && (
-                <p className="text-sm text-red-600 flex items-center gap-1">
+                <p className="text-sm text-red-600 flex items-center gap-1 animate-slide-up">
                   {errors.password}
                 </p>
               )}
@@ -156,15 +162,15 @@ export function Login({ onNavigate, onLogin }) {
                   id="remember"
                   checked={rememberMe}
                   onCheckedChange={(checked) => setRememberMe(checked)}
-                  className='checkbox'
+                  className="border-slate-300 dark:border-slate-600"
                 />
-                <Label htmlFor="remember" className="text-sm cursor-pointer">
+                <Label htmlFor="remember" className="text-sm cursor-pointer hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                   Remember me
                 </Label>
               </div>
               <button
                 type="button"
-                className="text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
+                className="text-sm text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors hover:underline"
                 onClick={() => onNavigate('forgot-password')}
               >
                 Forgot password?
@@ -173,7 +179,7 @@ export function Login({ onNavigate, onLogin }) {
 
             {/* Login Button */}
             <Button
-              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 h-11"
+              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 h-11 shadow-lg shadow-emerald-200/50 dark:shadow-emerald-900/50 hover:shadow-xl hover:shadow-emerald-200/60 dark:hover:shadow-emerald-900/60 transition-all hover:scale-105"
               onClick={handleLogin}
               disabled={isLoading}
             >
@@ -190,17 +196,17 @@ export function Login({ onNavigate, onLogin }) {
             {/* Divider */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200"></div>
+                <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-slate-500">or</span>
+                <span className="px-4 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400">or</span>
               </div>
             </div>
 
             {/* Social Login */}
             <Button
               variant="outline"
-              className="w-full h-11"
+              className="w-full h-11 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all hover:shadow-md"
               onClick={() => {
                 setIsLoading(true);
                 setTimeout(() => {
@@ -215,12 +221,12 @@ export function Login({ onNavigate, onLogin }) {
             </Button>
 
             {/* Sign Up Link */}
-            <div className="text-center pt-4 border-t border-slate-100">
-              <p className="text-sm text-slate-600">
+            <div className="text-center pt-4 border-t border-slate-100 dark:border-slate-700">
+              <p className="text-sm text-slate-600 dark:text-slate-400">
                 Don't have an account?{' '}
                 <button
                   onClick={() => onNavigate('signup')}
-                  className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors"
+                  className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-semibold transition-colors hover:underline"
                 >
                   Sign up
                 </button>
@@ -230,7 +236,7 @@ export function Login({ onNavigate, onLogin }) {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-8 text-sm text-slate-500">
+        <div className="text-center mt-6 sm:mt-8 text-xs sm:text-sm text-slate-500 dark:text-slate-400 animate-fade-in" style={{ animationDelay: '0.2s' }}>
           <p>© 2025 AI Nutritionist. Built for professional coaches.</p>
         </div>
       </div>
