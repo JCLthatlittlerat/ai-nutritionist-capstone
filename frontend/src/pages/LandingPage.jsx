@@ -2,7 +2,7 @@ import { ChefHat, TrendingUp, ShoppingCart, FileText, ArrowRight, Sparkles } fro
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 
-function LandingPage({ onNavigate }) {
+export function LandingPage({ onNavigate }) {
   const features = [
     {
       icon: ChefHat,
@@ -176,4 +176,3 @@ function LandingPage({ onNavigate }) {
     </div>
   );
 }
-export default LandingPage;

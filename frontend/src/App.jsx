@@ -1,16 +1,18 @@
 import { useState } from 'react';
-import LandingPage from './pages/LandingPage';
-// import { LandingPage } from './pages/LandingPage';
+import { LandingPage } from './pages/LandingPage';
 import { Dashboard } from './pages/Dashboard';
 import { CreateMealPlan } from './pages/CreateMealPlan';
 import { MealPlanView } from './pages/MealPlanView';
 import { Sidebar } from './pages/Sidebar';
 import { Login } from './pages/Login';
 import { SignUp } from './pages/SignUp';
+import { Sparkles, LogOut, Menu } from 'lucide-react';
+import { Button } from './components/ui/button';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('landing');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const handleNavigate = (page) => {
     setCurrentPage(page);
@@ -33,12 +35,19 @@ export default function App() {
   const handleLogout = () => {
     setIsAuthenticated(false);
     setCurrentPage('landing');
+    setIsMobileSidebarOpen(false);
   };
-if (!isAuthenticated) {
-  if (currentPage === 'login') return <Login onNavigate={handleNavigate} onLogin={handleLogin} />;
-  if (currentPage === 'signup') return <SignUp onNavigate={handleNavigate} onSignUp={handleSignUp} />;
-  return <LandingPage onNavigate={handleNavigate} />;
-}
+
+  // Auth pages - no sidebar
+  if(!isAuthenticated) {
+    if (currentPage === 'login') {
+      return <Login onNavigate={handleNavigate} onLogin={handleLogin} />;
+    }
+    if (currentPage === 'signup') {
+      return <SignUp onNavigate={handleNavigate} onSignUp={handleSignUp} />;
+    }
+
+  }
 
   // Landing page - no sidebar
   if (currentPage === 'landing') {
@@ -48,8 +57,44 @@ if (!isAuthenticated) {
   // App pages - with sidebar
   return (
     <div className="flex min-h-screen bg-slate-50">
-      <Sidebar currentPage={currentPage} onNavigate={handleNavigate} onLogout={handleLogout} />
-      <main className="flex-1 overflow-auto">
+      <Sidebar 
+        currentPage={currentPage} 
+        onNavigate={handleNavigate} 
+        onLogout={handleLogout}
+        isMobileOpen={isMobileSidebarOpen}
+        onMobileClose={() => setIsMobileSidebarOpen(false)}
+      />
+      
+      {/* Mobile Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 z-30 shadow-sm">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsMobileSidebarOpen(true)}
+            className="text-slate-600 hover:text-emerald-600 -ml-2"
+          >
+            <Menu className="w-6 h-6" />
+          </Button>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">AI Nutritionist</span>
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleLogout}
+          className="text-slate-600 hover:text-red-600"
+        >
+          <LogOut className="w-5 h-5" />
+        </Button>
+      </div>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-auto lg:pt-0 pt-16">
         {currentPage === 'dashboard' && <Dashboard onNavigate={handleNavigate} />}
         {currentPage === 'create' && <CreateMealPlan onNavigate={handleNavigate} onGenerate={handleGeneratePlan} />}
         {currentPage === 'demo' && <MealPlanView />}

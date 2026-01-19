@@ -1,6 +1,6 @@
 import { Users, TrendingUp, FileText, Calendar, Target, Utensils } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
 
 export function Dashboard({ onNavigate }) {
   const stats = [
@@ -70,32 +70,36 @@ export function Dashboard({ onNavigate }) {
   ];
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 lg:p-8 animate-fade-in">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Dashboard</h1>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">Dashboard</h1>
         <p className="text-slate-600">Welcome back! Here's your coaching overview.</p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <Card key={index} className="border-none shadow-md hover:shadow-lg transition-shadow duration-200">
+            <Card 
+              key={index} 
+              className="border border-slate-200 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 animate-scale-in"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm text-slate-600">
+                <CardTitle className="text-sm font-medium text-slate-600">
                   {stat.title}
                 </CardTitle>
-                <div className={`w-10 h-10 rounded-lg ${stat.bgColor} flex items-center justify-center`}>
+                <div className={`w-10 h-10 rounded-lg ${stat.bgColor} flex items-center justify-center transition-transform hover:scale-110`}>
                   <Icon className={`w-5 h-5 ${stat.color}`} />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-slate-900 mb-1">
+                <div className="text-2xl sm:text-3xl font-bold text-slate-900 mb-1">
                   {stat.value}
                 </div>
-                <p className="text-sm text-slate-500">{stat.change}</p>
+                <p className="text-xs sm:text-sm text-slate-500">{stat.change}</p>
               </CardContent>
             </Card>
           );
@@ -103,24 +107,32 @@ export function Dashboard({ onNavigate }) {
       </div>
 
       {/* Quick Actions */}
-      <Card className="mb-8 border-none shadow-md">
+      <Card className="mb-6 sm:mb-8 border border-slate-200 shadow-md hover:shadow-lg transition-all">
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">Quick Actions</CardTitle>
           <CardDescription>Common tasks for your coaching workflow</CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-wrap gap-3">
+        <CardContent className="flex flex-col sm:flex-row flex-wrap gap-3">
           <Button 
-            className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+            className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-md hover:shadow-lg transition-all hover:scale-105"
             onClick={() => onNavigate('create')}
           >
             <Utensils className="w-4 h-4 mr-2" />
             Create New Meal Plan
           </Button>
-          <Button variant="outline" onClick={() => onNavigate('clients')}>
+          <Button 
+            variant="outline" 
+            onClick={() => onNavigate('clients')}
+            className="w-full sm:w-auto hover:bg-emerald-50 hover:border-emerald-600 hover:text-emerald-700 transition-all"
+          >
             <Users className="w-4 h-4 mr-2" />
             View Clients
           </Button>
-          <Button variant="outline" onClick={() => onNavigate('history')}>
+          <Button 
+            variant="outline" 
+            onClick={() => onNavigate('history')}
+            className="w-full sm:w-auto hover:bg-teal-50 hover:border-teal-600 hover:text-teal-700 transition-all"
+          >
             <Calendar className="w-4 h-4 mr-2" />
             Plan History
           </Button>
@@ -128,32 +140,32 @@ export function Dashboard({ onNavigate }) {
       </Card>
 
       {/* Recent Plans */}
-      <Card className="border-none shadow-md">
+      <Card className="border border-slate-200 shadow-md hover:shadow-lg transition-all">
         <CardHeader>
-          <CardTitle>Recent Meal Plans</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">Recent Meal Plans</CardTitle>
           <CardDescription>Your latest client meal plans</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {recentPlans.map((plan, index) => (
               <div 
                 key={index}
-                className="flex items-center justify-between p-4 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors duration-150 cursor-pointer"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg bg-gradient-to-r from-slate-50 to-white hover:from-emerald-50 hover:to-teal-50 hover:shadow-md transition-all duration-300 cursor-pointer border border-transparent hover:border-emerald-200"
                 onClick={() => onNavigate('demo')}
               >
-                <div className="flex-1">
-                  <h4 className="font-semibold text-slate-900">{plan.client}</h4>
+                <div className="flex-1 mb-3 sm:mb-0">
+                  <h4 className="font-semibold text-slate-900 mb-1">{plan.client}</h4>
                   <p className="text-sm text-slate-600">
-                    {plan.goal} • {plan.calories} cal/day
+                    {plan.goal} • <span className="font-medium">{plan.calories} cal/day</span>
                   </p>
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-sm text-slate-500">{plan.date}</span>
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <span className="text-xs sm:text-sm text-slate-500">{plan.date}</span>
                   <span 
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
                       plan.status === 'Active' 
-                        ? 'bg-emerald-100 text-emerald-700' 
-                        : 'bg-slate-200 text-slate-700'
+                        ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' 
+                        : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
                     }`}
                   >
                     {plan.status}
