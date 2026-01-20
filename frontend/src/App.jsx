@@ -6,6 +6,8 @@ import { MealPlanView } from './pages/MealPlanView';
 import { Sidebar } from './pages/Sidebar';
 import { Login } from './pages/Login';
 import { SignUp } from './pages/SignUp';
+import { Clients } from './pages/Clients';
+import { Settings } from './pages/Settings';
 import { Sparkles, LogOut, Menu } from 'lucide-react';
 import { Button } from './components/ui/button';
 import { ThemeProvider } from './providers/ThemeProvider';
@@ -113,6 +115,8 @@ export default function App() {
           {currentPage === 'dashboard' && <Dashboard onNavigate={handleNavigate} />}
           {currentPage === 'create' && <CreateMealPlan onNavigate={handleNavigate} onGenerate={handleGeneratePlan} />}
           {currentPage === 'demo' && <MealPlanView />}
+          {currentPage === 'clients' && <Clients onNavigate={handleNavigate} />}
+          {currentPage === 'settings' && <Settings onNavigate={handleNavigate} />}
         </main>
       </div>
     </ThemeProvider>
