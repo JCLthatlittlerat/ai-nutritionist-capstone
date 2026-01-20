@@ -37,7 +37,7 @@ export function Sidebar({
   };
 
   return (
-    <>
+    <div className="sticky top-0 h-screen z-50">
       {/* Mobile Backdrop */}
       {isMobileOpen && (
         <div
@@ -53,7 +53,7 @@ export function Sidebar({
         w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex-col shadow-lg lg:shadow-sm
         transition-transform duration-300 ease-in-out
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-        lg:flex
+        lg:flex h-screen
       `}
       >
         {/* Mobile Close Button */}
@@ -112,7 +112,7 @@ export function Sidebar({
         </nav>
 
         {/* User Info & Theme Toggle */}
-        <div className="p-4 border-t border-slate-200 dark:border-slate-700 space-y-3">
+        <div className="absolute bottom-0 p-4 border-t border-slate-200 dark:border-slate-700 space-y-3">
           <div className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-slate-50 to-emerald-50/30 dark:from-slate-700 dark:to-emerald-900/20 hover:shadow-md transition-all cursor-pointer">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-semibold shadow-md">
               JD
@@ -143,6 +143,6 @@ export function Sidebar({
           )}
         </div>
       </aside>
-    </>
+    </div>
   );
 }

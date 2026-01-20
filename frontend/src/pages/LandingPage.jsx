@@ -1,4 +1,4 @@
-import { ChefHat, TrendingUp, ShoppingCart, FileText, ArrowRight, Sparkles } from 'lucide-react';
+import { ChefHat, TrendingUp, ShoppingCart, FileText, ArrowRight, Sparkles, LogIn, UserPlus  } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { ThemeToggle } from '../components/ThemeToggle';
@@ -46,15 +46,34 @@ export function LandingPage({ onNavigate }) {
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">AI Nutritionist</span>
           </div>
-          <nav className="flex items-center gap-3">
-            <ThemeToggle />
-            <Button variant="ghost" onClick={() => onNavigate('login')} className="hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors">
-              Log In
-            </Button>
-            <Button onClick={() => onNavigate('signup')} className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md hover:shadow-lg transition-all">
-              Get Started
-            </Button>
-          </nav>
+<nav className="flex items-center gap-3">
+  <ThemeToggle />
+
+  {/* Login */}
+  <Button
+    variant="ghost"
+    onClick={() => onNavigate('login')}
+    className="hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors"
+  >
+    {/* Desktop text */}
+    <span className="hidden sm:inline">Log In</span>
+
+    {/* Mobile icon */}
+    <LogIn className="w-5 h-5 sm:hidden" />
+  </Button>
+
+  {/* Signup */}
+  <Button
+    onClick={() => onNavigate('signup')}
+    className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md hover:shadow-lg transition-all"
+  >
+    {/* Desktop text */}
+    <span className="hidden sm:inline">Get Started</span>
+
+    {/* Mobile icon */}
+    <UserPlus className="w-5 h-5 sm:hidden" />
+  </Button>
+</nav>
         </div>
       </header>
 
