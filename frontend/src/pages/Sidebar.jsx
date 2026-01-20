@@ -9,7 +9,6 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
-import { ThemeToggle } from "../components/ThemeToggle";
 
 export function Sidebar({
   currentPage,
@@ -114,11 +113,6 @@ export function Sidebar({
 
         {/* User Info & Theme Toggle */}
         <div className="p-4 border-t border-slate-200 dark:border-slate-700 space-y-3">
-          {/* Theme Toggle */}
-          <div className="flex justify-center">
-            <ThemeToggle />
-          </div>
-
           <div className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-slate-50 to-emerald-50/30 dark:from-slate-700 dark:to-emerald-900/20 hover:shadow-md transition-all cursor-pointer">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-semibold shadow-md">
               JD

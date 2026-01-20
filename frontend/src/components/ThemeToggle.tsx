@@ -1,7 +1,13 @@
-import { Moon, Sun, Monitor } from "lucide-react";
+import { Moon, Sun, Monitor, Check } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -14,55 +20,56 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <div className="flex items-center gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-800">
-        <Button variant="ghost" size="sm" className="w-8 h-8 p-0" disabled>
-          <Sun className="w-4 h-4" />
-        </Button>
-      </div>
+      <Button variant="ghost" size="sm" className="w-9 h-9 p-0" disabled>
+        <Sun className="h-5 w-5" />
+      </Button>
     );
   }
 
+  const getCurrentIcon = () => {
+    if (theme === "dark") return <Moon className="h-5 w-5" />;
+    if (theme === "light") return <Sun className="h-5 w-5" />;
+    return <Monitor className="h-5 w-5" />;
+  };
+
   return (
-    <div className="flex items-center gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-800 transition-colors">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => setTheme("light")}
-        className={`w-8 h-8 p-0 transition-all ${
-          theme === "light"
-            ? "bg-white dark:bg-slate-700 shadow-sm text-emerald-600"
-            : "hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400"
-        }`}
-        title="Light mode"
-      >
-        <Sun className="w-4 h-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => setTheme("dark")}
-        className={`w-8 h-8 p-0 transition-all ${
-          theme === "dark"
-            ? "bg-white dark:bg-slate-700 shadow-sm text-emerald-600"
-            : "hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400"
-        }`}
-        title="Dark mode"
-      >
-        <Moon className="w-4 h-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => setTheme("system")}
-        className={`w-8 h-8 p-0 transition-all ${
-          theme === "system"
-            ? "bg-white dark:bg-slate-700 shadow-sm text-emerald-600"
-            : "hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400"
-        }`}
-        title="System mode"
-      >
-        <Monitor className="w-4 h-4" />
-      </Button>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-9 h-9 p-0 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+        >
+          {getCurrentIcon()}
+          <span className="sr-only">Toggle theme</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-36">
+        <DropdownMenuItem
+          onClick={() => setTheme("light")}
+          className="cursor-pointer"
+        >
+          <Sun className="h-4 w-4 mr-2" />
+          <span>Light</span>
+          {theme === "light" && <Check className="h-4 w-4 ml-auto" />}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => setTheme("dark")}
+          className="cursor-pointer"
+        >
+          <Moon className="h-4 w-4 mr-2" />
+          <span>Dark</span>
+          {theme === "dark" && <Check className="h-4 w-4 ml-auto" />}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => setTheme("system")}
+          className="cursor-pointer"
+        >
+          <Monitor className="h-4 w-4 mr-2" />
+          <span>System</span>
+          {theme === "system" && <Check className="h-4 w-4 ml-auto" />}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

@@ -4,7 +4,6 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Checkbox } from '../components/ui/checkbox';
-import { ThemeToggle } from '../components/ThemeToggle';
 
 export function Login({ onNavigate, onLogin }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -70,11 +69,6 @@ export function Login({ onNavigate, onLogin }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950/20 flex items-center justify-center p-4 sm:p-6 animate-fade-in">
       <div className="w-full max-w-md">
-        {/* Theme Toggle - Top Right */}
-        <div className="flex justify-end mb-4">
-          <ThemeToggle />
-        </div>
-        
         {/* Logo */}
         <div className="text-center mb-6 sm:mb-8 animate-slide-up">
           <div className="flex items-center justify-center gap-2 mb-4 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => onNavigate('landing')}>
