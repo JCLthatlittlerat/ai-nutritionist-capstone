@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LandingPage } from './pages/LandingPage';
 import { Dashboard } from './pages/Dashboard';
 import { CreateMealPlan } from './pages/CreateMealPlan';
@@ -16,19 +16,37 @@ import authService from './services/auth.service';
 export default function App() {
   const [currentPage, setCurrentPage] = useState('landing');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // Check authentication status on initial load
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      const user = await authService.getCurrentUser();
+      if (user) {
+        setIsAuthenticated(true);
+        setCurrentUser(user);
+      }
+    };
+    
+    checkAuthStatus();
+  }, []);
 
   const handleNavigate = (page) => {
     setCurrentPage(page);
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
+    const user = await authService.getCurrentUser();
     setIsAuthenticated(true);
+    setCurrentUser(user);
     setCurrentPage('dashboard');
   };
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
+    const user = await authService.getCurrentUser();
     setIsAuthenticated(true);
+    setCurrentUser(user);
     setCurrentPage('dashboard');
   };
 
@@ -39,6 +57,7 @@ export default function App() {
   const handleLogout = () => {
     authService.logout();
     setIsAuthenticated(false);
+    setCurrentUser(null);
     setCurrentPage('landing');
     setIsMobileSidebarOpen(false);
   };
@@ -82,6 +101,7 @@ export default function App() {
           onLogout={handleLogout}
           isMobileOpen={isMobileSidebarOpen}
           onMobileClose={() => setIsMobileSidebarOpen(false)}
+          user={currentUser}
         />
         
         {/* Mobile Header */}
@@ -118,7 +138,7 @@ export default function App() {
           {currentPage === 'create' && <CreateMealPlan onNavigate={handleNavigate} onGenerate={handleGeneratePlan} />}
           {currentPage === 'demo' && <MealPlanView />}
           {currentPage === 'clients' && <Clients onNavigate={handleNavigate} />}
-          {currentPage === 'settings' && <Settings onNavigate={handleNavigate} />}
+          {currentPage === 'settings' && <Settings />}
         </main>
       </div>
     </ThemeProvider>

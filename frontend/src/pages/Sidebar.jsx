@@ -16,6 +16,7 @@ export function Sidebar({
   onLogout,
   isMobileOpen,
   onMobileClose,
+  user
 }) {
   const navItems = [
     {
@@ -115,14 +116,14 @@ export function Sidebar({
         <div className="absolute bottom-0 p-4 border-t border-slate-200 dark:border-slate-700 space-y-3">
           <div className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-slate-50 to-emerald-50/30 dark:from-slate-700 dark:to-emerald-900/20 hover:shadow-md transition-all cursor-pointer">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-semibold shadow-md">
-              JD
+              {user ? `${user.name.charAt(0)}${user.name.split(' ')[1] ? user.name.split(' ')[1].charAt(0) : ''}` : 'JD'}
             </div>
             <div className="flex-1 min-w-0">
               <div className="font-semibold text-slate-900 dark:text-white text-sm truncate">
-                John Doe
+                {user ? user.name : 'John Doe'}
               </div>
               <div className="text-xs text-slate-500 dark:text-slate-400">
-                Pro Coach
+                {user ? user.role : 'Pro Coach'}
               </div>
             </div>
           </div>

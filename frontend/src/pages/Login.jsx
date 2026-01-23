@@ -26,11 +26,11 @@ export function Login({ onNavigate, onLogin }) {
 
   const handleLogin = async () => {
     // Reset errors
-    setErrors({ email: '', password: '' });
+    setErrors({ email: '', password: '', server: '' });
 
     // Validate
     let hasErrors = false;
-    const newErrors = { email: '', password: '' };
+    const newErrors = { email: '', password: '', server: '' };
 
     if (!formData.email) {
       newErrors.email = 'Email is required';
@@ -56,7 +56,7 @@ export function Login({ onNavigate, onLogin }) {
     // Login with real API
     setIsLoading(true);
     try {
-      await authService.login(formData.email, formData.password);
+      await authService.login(formData.email, formData.password, rememberMe);
       onLogin();
     } catch (error) {
       const errorMessage = error.response?.data?.detail || 'Login failed. Please check your credentials.';
