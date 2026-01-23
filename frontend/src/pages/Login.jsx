@@ -4,6 +4,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Checkbox } from '../components/ui/checkbox';
+import authService from '../services/auth.service';
 
 export function Login({ onNavigate, onLogin }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -52,12 +53,17 @@ export function Login({ onNavigate, onLogin }) {
       return;
     }
 
-    // Simulate login
+    // Login with real API
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await authService.login(formData.email, formData.password);
       onLogin();
-    }, 1500);
+    } catch (error) {
+      const errorMessage = error.response?.data?.detail || 'Login failed. Please check your credentials.';
+      setErrors({ ...errors, server: errorMessage });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -112,6 +118,14 @@ export function Login({ onNavigate, onLogin }) {
                 </p>
               )}
             </div>
+
+            {errors.server && (
+              <div className="p-3 rounded-lg bg-red-50 border border-red-100 dark:bg-red-900/20 dark:border-red-900/30">
+                <p className="text-sm text-red-600 dark:text-red-400 text-center font-medium">
+                  {errors.server}
+                </p>
+              </div>
+            )}
 
             {/* Password */}
             <div className="space-y-2">

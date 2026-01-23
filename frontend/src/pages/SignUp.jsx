@@ -4,6 +4,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Checkbox } from '../components/ui/checkbox';
+import authService from '../services/auth.service';
 
 export function SignUp({ onNavigate, onSignUp }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -84,12 +85,21 @@ export function SignUp({ onNavigate, onSignUp }) {
       return;
     }
 
-    // Simulate sign up
+    // Sign up with real API
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await authService.register({
+        name: formData.fullName,
+        email: formData.email,
+        password: formData.password
+      });
       onSignUp();
-    }, 1500);
+    } catch (error) {
+      const errorMessage = error.response?.data?.detail || 'Registration failed. Please try again.';
+      setErrors({ ...errors, server: errorMessage });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -163,6 +173,13 @@ export function SignUp({ onNavigate, onSignUp }) {
             {/* Account Type Selection */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Account Type</Label>
+              {errors.server && (
+                <div className="p-3 rounded-lg bg-red-50 border border-red-100 dark:bg-red-900/20 dark:border-red-900/30">
+                  <p className="text-sm text-red-600 dark:text-red-400 text-center font-medium">
+                    {errors.server}
+                  </p>
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 {/* Fitness Coach Option */}
                 <button

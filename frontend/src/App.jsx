@@ -11,6 +11,7 @@ import { Settings } from './pages/Settings';
 import { Sparkles, LogOut, Menu } from 'lucide-react';
 import { Button } from './components/ui/button';
 import { ThemeProvider } from './providers/ThemeProvider';
+import authService from './services/auth.service';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('landing');
@@ -36,6 +37,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    authService.logout();
     setIsAuthenticated(false);
     setCurrentPage('landing');
     setIsMobileSidebarOpen(false);
