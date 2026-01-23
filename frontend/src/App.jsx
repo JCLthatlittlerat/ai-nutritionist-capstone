@@ -122,3 +122,4 @@ export default function App() {
     </ThemeProvider>
   );
 }
+// checkpoint before the backend integration.
