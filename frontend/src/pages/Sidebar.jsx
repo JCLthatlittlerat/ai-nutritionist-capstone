@@ -18,7 +18,24 @@ export function Sidebar({
   onMobileClose,
   user
 }) {
-  const navItems = [
+  // Define navigation items based on user role
+  const navItems = user?.role === 'user' ? [
+    {
+      id: "dashboard",
+      label: "Dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      id: "history",
+      label: "History",
+      icon: History,
+    },
+    {
+      id: "settings",
+      label: "Settings",
+      icon: Settings,
+    },
+  ] : [
     {
       id: "dashboard",
       label: "Dashboard",
@@ -81,7 +98,7 @@ export function Sidebar({
                 AI Nutritionist
               </div>
               <div className="text-xs text-slate-500 dark:text-slate-400">
-                Coach Dashboard
+                {user ? `${String(user.role).charAt(0).toUpperCase() + String(user.role).slice(1)} Dashboard` : 'Coach Dashboard'}
               </div>
             </div>
           </div>

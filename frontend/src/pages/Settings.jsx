@@ -47,8 +47,9 @@ export function Settings() {
 
           // Set profile picture if available
           if (user.profile_picture) {
-            // Create a preview URL - adjust based on how the backend returns the image path
-            setPreviewImage(`http://localhost:8000/uploads/${user.profile_picture.split('/').pop()}`);
+            // Extract filename from the full path and construct the correct URL
+            const fileName = user.profile_picture.split('/').pop();
+            setPreviewImage(`/uploads/${fileName}`);
           }
         }
       } catch (error) {

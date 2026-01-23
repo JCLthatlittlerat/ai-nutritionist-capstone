@@ -90,4 +90,14 @@ const uploadProfilePicture = async (file) => {
   return response.data;
 };
 
-export default { login, register, logout, getCurrentUser, getToken, updateProfile, uploadProfilePicture };
+const getUserMealPlans = async () => {
+  try {
+    const response = await api.get('/mealplan/user');
+    return response.data;
+  } catch (error) {
+    console.error('Error getting user meal plans:', error);
+    throw error;
+  }
+};
+
+export default { login, register, logout, getCurrentUser, getToken, updateProfile, uploadProfilePicture, getUserMealPlans };
