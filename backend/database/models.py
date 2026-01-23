@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Text, LargeBinary
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from .database import Base
@@ -10,7 +10,31 @@ class User(Base):
     name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(String, nullable=False)
+    role = Column(String, default="user", nullable=False)  # Add role field
+    is_active = Column(Boolean, default=True)
+    is_verified = Column(Boolean, default=False)
+    failed_login_attempts = Column(Integer, default=0)
+    locked_until = Column(DateTime, nullable=True)
+    last_login = Column(DateTime, nullable=True)
+    refresh_token_hash = Column(String, nullable=True)
+    refresh_token_expires = Column(DateTime, nullable=True)
+    email_verified = Column(Boolean, default=False)
+    email_verification_token = Column(String, nullable=True)
+    email_verification_expires = Column(DateTime, nullable=True)
+    password_reset_token = Column(String, nullable=True)
+    password_reset_expires = Column(DateTime, nullable=True)
+    tfa_enabled = Column(Boolean, default=False)
+    tfa_verified = Column(Boolean, default=False)
+    tfa_secret = Column(String, nullable=True)
+    profile_picture = Column(String, nullable=True)  # Path to user's profile picture
+    height = Column(Integer, nullable=True)  # User's height in cm
+    weight = Column(Integer, nullable=True)  # User's weight in kg
+    age = Column(Integer, nullable=True)  # User's age
+    gender = Column(String, nullable=True)  # User's gender
+    activity_level = Column(String, nullable=True)  # User's activity level
+    goal = Column(String, nullable=True)  # User's fitness goal
     created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     mealplans = relationship("MealPlan", back_populates="owner")
 
