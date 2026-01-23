@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Button } from '../components/ui/button';
 import { ThemeToggle } from '../components/ThemeToggle';
 
-export function Dashboard({ onNavigate }) {
+export function Dashboard({ onNavigate, currentUser }) {
   const stats = [
     {
       title: 'Active Clients',
@@ -76,7 +76,9 @@ export function Dashboard({ onNavigate }) {
       <div className="mb-6 sm:mb-8 flex items-start justify-between">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">Dashboard</h1>
-          <p className="text-slate-600 dark:text-slate-300">Welcome back! Here's your coaching overview.</p>
+          <p className="text-slate-600 dark:text-slate-300">
+            Welcome back{currentUser?.first_name ? `, ${currentUser.first_name}` : ''}! Here's your coaching overview.
+          </p>
         </div>
         <ThemeToggle />
       </div>

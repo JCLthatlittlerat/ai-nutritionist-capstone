@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { LandingPage } from './pages/LandingPage';
 import { Dashboard } from './pages/Dashboard';
+import { UserDashboard } from './pages/UserDashboard';
 import { CreateMealPlan } from './pages/CreateMealPlan';
 import { MealPlanView } from './pages/MealPlanView';
 import { Sidebar } from './pages/Sidebar';
@@ -135,7 +136,11 @@ export default function App() {
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto lg:pt-0 pt-16">
-          {currentPage === 'dashboard' && <Dashboard onNavigate={handleNavigate} />}
+          {currentPage === 'dashboard' && (
+            currentUser?.role === 'user' 
+              ? <UserDashboard onNavigate={handleNavigate} />
+              : <Dashboard onNavigate={handleNavigate} currentUser={currentUser} />
+          )}
           {(currentUser?.role !== 'user' && currentPage === 'create') && <CreateMealPlan onNavigate={handleNavigate} onGenerate={handleGeneratePlan} />}
           {(currentUser?.role !== 'user' && currentPage === 'clients') && <Clients onNavigate={handleNavigate} />}
           {currentPage === 'demo' && <MealPlanView />}
