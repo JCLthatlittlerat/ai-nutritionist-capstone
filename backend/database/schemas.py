@@ -20,10 +20,23 @@ class UserResponse(BaseModel):
     id: int
     name: str
     email: str
+    role: str
+    is_active: bool
+    is_verified: bool
+    tfa_enabled: bool
+    tfa_verified: bool
+    profile_picture: Optional[str] = None  # Path to user's profile picture
+    height: Optional[float] = None
+    weight: Optional[float] = None
+    age: Optional[int] = None
+    gender: Optional[str] = None
+    activity_level: Optional[str] = None
+    goal: Optional[str] = None
     created_at: datetime
+    last_login: Optional[datetime]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # ----------- MEAL PLAN SCHEMAS -----------
@@ -52,7 +65,7 @@ class MealPlanResponse(BaseModel):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # ----------- MEAL HISTORY SCHEMAS -----------
@@ -64,9 +77,12 @@ class MealHistoryResponse(BaseModel):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class MealPlanFullResponse(BaseModel):
     mealplan: MealPlanResponse
     history: List[MealHistoryResponse]
+
+    class Config:
+        from_attributes = True
