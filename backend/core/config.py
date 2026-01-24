@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     EMAIL_PASSWORD: str = ""
     FRONTEND_URL: str = "http://localhost:5173"
     EMAIL_USE_TLS: bool = True
+    GOOGLE_CLIENT_ID: str | None = None
 
     model_config = ConfigDict(env_file=".env")
 
