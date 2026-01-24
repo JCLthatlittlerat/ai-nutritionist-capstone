@@ -7,6 +7,7 @@ import { MealPlanView } from './pages/MealPlanView';
 import { Sidebar } from './pages/Sidebar';
 import { Login } from './pages/Login';
 import { SignUp } from './pages/SignUp';
+import { ForgotPassword } from './pages/ForgotPassword';
 import { Clients } from './pages/Clients';
 import { Settings } from './pages/Settings';
 import { History } from './pages/History';
@@ -79,6 +80,14 @@ export default function App() {
       return (
         <ThemeProvider>
           <SignUp onNavigate={handleNavigate} onSignUp={handleSignUp} />
+        </ThemeProvider>
+      );
+    }
+
+    if (currentPage === 'forgot-password') {
+      return (
+        <ThemeProvider>
+          <ForgotPassword onNavigate={handleNavigate} />
         </ThemeProvider>
       );
     }

@@ -92,7 +92,8 @@ export function SignUp({ onNavigate, onSignUp }) {
       await authService.register({
         name: formData.fullName,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        role: accountType  // Send the selected account type as role
       });
       
       // Automatically log in after registration

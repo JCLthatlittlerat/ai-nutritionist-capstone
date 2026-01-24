@@ -235,12 +235,19 @@ def register_user(request: Request, user: UserCreate, db: Session = Depends(get_
     verification_token = EmailVerification.generate_verification_token()
     verification_expires = datetime.utcnow() + timedelta(hours=24)  # Token valid for 24 hours
     
+    # Validate role
+    if user.role not in ["user", "coach"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid role. Valid roles: user, coach"
+        )
+    
     # Create new user
     db_user = User(
         name=user.name,
         email=user.email,
         password_hash=hashed_password,
-        role="user",  # Default role is user
+        role=user.role,  # Use the provided role
         is_active=True,
         is_verified=False,
         email_verification_token=verification_token,

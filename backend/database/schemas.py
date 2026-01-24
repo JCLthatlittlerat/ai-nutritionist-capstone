@@ -9,6 +9,7 @@ class UserCreate(BaseModel):
     name: str
     email: str
     password: str
+    role: str = "user"  # Default to user, can be "user" or "coach"
 
 
 class UserLogin(BaseModel):
