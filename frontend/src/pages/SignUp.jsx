@@ -5,6 +5,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Checkbox } from '../components/ui/checkbox';
 import authService from '../services/auth.service';
+import { GoogleLogin } from '@react-oauth/google';
 
 export function SignUp({ onNavigate, onSignUp }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -103,6 +104,19 @@ export function SignUp({ onNavigate, onSignUp }) {
       const errorMessage = error.response?.data?.detail || 'Registration failed. Please try again.';
       setErrors({ ...errors, server: errorMessage });
       console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setIsLoading(true);
+    try {
+      await authService.googleLogin(credentialResponse.credential, rememberMe);
+      onSignUp();
+    } catch (error) {
+      console.error('Google login error:', error);
+      setErrors({ ...errors, server: 'Google sign up failed. Please try again.' });
     } finally {
       setIsLoading(false);
     }
@@ -441,21 +455,18 @@ export function SignUp({ onNavigate, onSignUp }) {
             </div>
 
             {/* Social Sign Up */}
-            <Button
-              variant="outline"
-              className="w-full h-11 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all hover:shadow-md"
-              onClick={() => {
-                setIsLoading(true);
-                setTimeout(() => {
-                  setIsLoading(false);
-                  onSignUp();
-                }, 1500);
-              }}
-              disabled={isLoading}
-            >
-              <Chrome className="w-5 h-5 mr-2" />
-              Sign up with Google
-            </Button>
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => {
+                  setErrors({ ...errors, server: 'Google sign up failed.' });
+                }}
+                useOneTap
+                theme="filled_blue"
+                shape="pill"
+                width="100%"
+              />
+            </div>
 
             {/* Login Link */}
             <div className="text-center pt-4 border-t border-slate-100 dark:border-slate-700">
