@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Badge } from '../components/ui/badge';
 import authService from '../services/auth.service';
 
-export function History() {
+export function History({ onNavigate }) {
   const [mealPlans, setMealPlans] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -136,6 +136,7 @@ export function History() {
               <Card 
                 key={plan.id} 
                 className="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => onNavigate && onNavigate('demo', { mealPlanId: plan.id })}
               >
                 <CardHeader>
                   <div className="flex items-start justify-between">

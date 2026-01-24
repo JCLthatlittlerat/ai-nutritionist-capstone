@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, Mail, Phone, Calendar, Target, TrendingUp, Filter, MoreVertical, User } from 'lucide-react';
+import { Search, Plus, Mail, Phone, Calendar, Target, TrendingUp, Filter, MoreVertical, User, X } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
@@ -11,6 +11,13 @@ export function Clients({ onNavigate }) {
   const [filterStatus, setFilterStatus] = useState('all'); // all, active, inactive
   const [clientsData, setClientsData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showAddClientDialog, setShowAddClientDialog] = useState(false);
+  const [newClientData, setNewClientData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+  });
+  const [addClientError, setAddClientError] = useState('');
 
   // Fetch clients data from the backend
   useEffect(() => {
@@ -77,6 +84,79 @@ export function Clients({ onNavigate }) {
       'bg-cyan-500',
     ];
     return colors[id % colors.length];
+  };
+
+  const handleAddClient = async () => {
+    setAddClientError('');
+    
+    // Validate required fields
+    if (!newClientData.name || !newClientData.email) {
+      setAddClientError('Name and email are required');
+      return;
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newClientData.email)) {
+      setAddClientError('Please enter a valid email address');
+      return;
+    }
+    
+    try {
+      // Create new user with role 'user'
+      await api.post('/auth/register', {
+        name: newClientData.name,
+        email: newClientData.email,
+        phone: newClientData.phone,
+        password: 'TempPassword123!',
+        role: 'user'
+      });
+      
+      // Close dialog and reset form
+      setShowAddClientDialog(false);
+      setNewClientData({ name: '', email: '', phone: '' });
+      
+      // Refresh clients list
+      const response = await api.get('/auth/users');
+      const users = response.data.filter(user => user.role === 'user');
+      const transformedClients = users.map(user => {
+        const nameParts = user.name ? user.name.split(' ') : ['User'];
+        const initials = nameParts.length >= 2 
+          ? `${nameParts[0][0]}${nameParts[1][0]}`
+          : nameParts[0][0];
+        
+        return {
+          id: user.id,
+          name: user.name || 'Unknown',
+          email: user.email,
+          phone: user.phone || 'N/A',
+          goal: user.goal || 'Not Set',
+          status: user.is_active ? 'Active' : 'Inactive',
+          joinDate: new Date(user.created_at).toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          }),
+          currentWeight: user.weight ? `${user.weight} lbs` : 'N/A',
+          targetWeight: 'N/A',
+          progress: 50,
+          activePlans: 0,
+          totalCalories: 0,
+          avatar: initials,
+          avatarColor: getAvatarColor(user.id),
+        };
+      });
+      
+      setClientsData(transformedClients);
+      alert('Client added successfully!');
+    } catch (error) {
+      console.error('Error adding client:', error);
+      if (error.response?.data?.detail?.includes('already exists')) {
+        setAddClientError('A user with this email already exists');
+      } else {
+        setAddClientError(error.response?.data?.detail || 'Failed to add client. Please try again.');
+      }
+    }
   };
 
   // Filter clients based on search and status
@@ -181,6 +261,7 @@ export function Clients({ onNavigate }) {
             </div>
             <Button 
               className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+              onClick={() => setShowAddClientDialog(true)}
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Client
@@ -289,8 +370,103 @@ export function Clients({ onNavigate }) {
               </div>
             </CardContent>
           </Card>
-        ))}
+        ))}        
       </div>
+      )}
+
+      {/* Add Client Dialog */}
+      {showAddClientDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md border-none shadow-2xl">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Add New Client</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setShowAddClientDialog(false);
+                    setNewClientData({ name: '', email: '', phone: '' });
+                    setAddClientError('');
+                  }}
+                  className="h-8 w-8 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <CardDescription>
+                Create a new client account. They will receive a temporary password.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {addClientError && (
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
+                  {addClientError}
+                </div>
+              )}
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                  Full Name *
+                </label>
+                <Input
+                  type="text"
+                  placeholder="John Doe"
+                  value={newClientData.name}
+                  onChange={(e) => setNewClientData({ ...newClientData, name: e.target.value })}
+                  className="w-full"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                  Email Address *
+                </label>
+                <Input
+                  type="email"
+                  placeholder="john.doe@example.com"
+                  value={newClientData.email}
+                  onChange={(e) => setNewClientData({ ...newClientData, email: e.target.value })}
+                  className="w-full"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                  Phone Number (Optional)
+                </label>
+                <Input
+                  type="tel"
+                  placeholder="+1 (555) 123-4567"
+                  value={newClientData.phone}
+                  onChange={(e) => setNewClientData({ ...newClientData, phone: e.target.value })}
+                  className="w-full"
+                />
+              </div>
+              
+              <div className="flex gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowAddClientDialog(false);
+                    setNewClientData({ name: '', email: '', phone: '' });
+                    setAddClientError('');
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleAddClient}
+                  className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Client
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );

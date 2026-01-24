@@ -409,6 +409,24 @@ def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 
+@router.get("/users", response_model=list[UserResponse])
+def get_all_users(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all users (for coaches to view their clients)"""
+    # Only allow coaches to access this endpoint
+    if current_user.role not in ['coach', 'admin']:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to access this resource"
+        )
+    
+    # Get all users from database
+    users = db.query(User).all()
+    return users
+
+
 # Schema for updating user profile
 from pydantic import BaseModel
 
@@ -484,6 +502,28 @@ def change_password(
     db.commit()
     
     return {"message": "Password changed successfully"}
+
+
+@router.post("/remove-profile-picture")
+async def remove_profile_picture(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Remove user's profile picture"""
+    # If user has a profile picture, delete the file
+    if current_user.profile_picture:
+        file_path = Path(current_user.profile_picture)
+        if file_path.exists():
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                logging.error(f"Error deleting profile picture file: {str(e)}")
+    
+    # Clear the profile picture field in database
+    current_user.profile_picture = None
+    db.commit()
+    
+    return {"message": "Profile picture removed successfully"}
 
 
 @router.post("/logout")

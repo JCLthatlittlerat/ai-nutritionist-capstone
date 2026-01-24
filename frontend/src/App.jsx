@@ -21,6 +21,7 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [selectedMealPlanId, setSelectedMealPlanId] = useState(null);
 
   // Check authentication status on initial load
   useEffect(() => {
@@ -35,8 +36,11 @@ export default function App() {
     checkAuthStatus();
   }, []);
 
-  const handleNavigate = (page) => {
+  const handleNavigate = (page, data) => {
     setCurrentPage(page);
+    if (page === 'demo' && data?.mealPlanId) {
+      setSelectedMealPlanId(data.mealPlanId);
+    }
   };
 
   const handleLogin = async () => {
@@ -152,8 +156,8 @@ export default function App() {
           )}
           {(currentUser?.role !== 'user' && currentPage === 'create') && <CreateMealPlan onNavigate={handleNavigate} onGenerate={handleGeneratePlan} />}
           {(currentUser?.role !== 'user' && currentPage === 'clients') && <Clients onNavigate={handleNavigate} />}
-          {currentPage === 'demo' && <MealPlanView />}
-          {currentPage === 'history' && <History />}
+          {currentPage === 'demo' && <MealPlanView mealPlanId={selectedMealPlanId} onNavigate={handleNavigate} />}
+          {currentPage === 'history' && <History onNavigate={handleNavigate} />}
           {currentPage === 'settings' && <Settings />}
           {currentUser?.role === 'user' && currentPage !== 'dashboard' && currentPage !== 'history' && currentPage !== 'settings' && (
             <div className="p-8 text-center">

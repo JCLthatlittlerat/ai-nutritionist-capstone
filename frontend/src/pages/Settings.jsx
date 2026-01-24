@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, Mail, Phone, MapPin, Lock, Bell, CreditCard, Shield, Globe, Moon, Save, Camera, Building, Briefcase } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Lock, Bell, CreditCard, Shield, Globe, Moon, Save, Camera, Building, Briefcase, X } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -190,6 +190,28 @@ export function Settings() {
     }
   };
 
+  const handleRemoveImage = async () => {
+    if (!confirm('Are you sure you want to remove your profile picture?')) {
+      return;
+    }
+    
+    try {
+      await api.post('/auth/remove-profile-picture');
+      setPreviewImage(null);
+      alert('Profile picture removed successfully!');
+      
+      // Refresh user data
+      const user = await authService.getCurrentUser();
+      if (user && user.profile_picture) {
+        const fileName = user.profile_picture.split('/').pop();
+        setPreviewImage(`/uploads/${fileName}`);
+      }
+    } catch (error) {
+      console.error('Error removing profile picture:', error);
+      alert('Failed to remove profile picture. Please try again.');
+    }
+  };
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 animate-fade-in max-w-6xl">
       {/* Header */}
@@ -231,11 +253,20 @@ export function Settings() {
               <div className="flex items-center gap-6">
                 <div className="relative">
                   {previewImage ? (
-                    <img 
-                      src={previewImage} 
-                      alt="Profile" 
-                      className="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-slate-700"
-                    />
+                    <>
+                      <img 
+                        src={previewImage} 
+                        alt="Profile" 
+                        className="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-slate-700"
+                      />
+                      <button
+                        onClick={handleRemoveImage}
+                        className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors"
+                        title="Remove picture"
+                      >
+                        <X className="w-4 h-4 text-white" />
+                      </button>
+                    </>
                   ) : (
                     <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-3xl">
                       {profile.firstName && profile.lastName 
