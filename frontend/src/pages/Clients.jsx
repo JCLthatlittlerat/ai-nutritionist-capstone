@@ -1,145 +1,83 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Plus, Mail, Phone, Calendar, Target, TrendingUp, Filter, MoreVertical, User } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
+import api from '../services/api';
 
 export function Clients({ onNavigate }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); // all, active, inactive
+  const [clientsData, setClientsData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Fabricated client data
-  const clientsData = [
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      email: 'sarah.j@email.com',
-      phone: '+1 (555) 123-4567',
-      goal: 'Muscle Gain',
-      status: 'Active',
-      joinDate: 'Jan 15, 2025',
-      currentWeight: '145 lbs',
-      targetWeight: '155 lbs',
-      progress: 65,
-      activePlans: 2,
-      totalCalories: 2800,
-      avatar: 'SJ',
-      avatarColor: 'bg-emerald-500',
-    },
-    {
-      id: 2,
-      name: 'Mike Chen',
-      email: 'mike.chen@email.com',
-      phone: '+1 (555) 234-5678',
-      goal: 'Fat Loss',
-      status: 'Active',
-      joinDate: 'Dec 20, 2024',
-      currentWeight: '210 lbs',
-      targetWeight: '185 lbs',
-      progress: 45,
-      activePlans: 1,
-      totalCalories: 1800,
-      avatar: 'MC',
-      avatarColor: 'bg-teal-500',
-    },
-    {
-      id: 3,
-      name: 'Emma Davis',
-      email: 'emma.davis@email.com',
-      phone: '+1 (555) 345-6789',
-      goal: 'Maintenance',
-      status: 'Active',
-      joinDate: 'Nov 10, 2024',
-      currentWeight: '135 lbs',
-      targetWeight: '135 lbs',
-      progress: 95,
-      activePlans: 1,
-      totalCalories: 2200,
-      avatar: 'ED',
-      avatarColor: 'bg-orange-500',
-    },
-    {
-      id: 4,
-      name: 'James Wilson',
-      email: 'j.wilson@email.com',
-      phone: '+1 (555) 456-7890',
-      goal: 'Muscle Gain',
-      status: 'Active',
-      joinDate: 'Jan 5, 2025',
-      currentWeight: '175 lbs',
-      targetWeight: '190 lbs',
-      progress: 30,
-      activePlans: 3,
-      totalCalories: 3000,
-      avatar: 'JW',
-      avatarColor: 'bg-blue-500',
-    },
-    {
-      id: 5,
-      name: 'Lisa Anderson',
-      email: 'lisa.a@email.com',
-      phone: '+1 (555) 567-8901',
-      goal: 'Fat Loss',
-      status: 'Inactive',
-      joinDate: 'Oct 8, 2024',
-      currentWeight: '165 lbs',
-      targetWeight: '145 lbs',
-      progress: 20,
-      activePlans: 0,
-      totalCalories: 1900,
-      avatar: 'LA',
-      avatarColor: 'bg-purple-500',
-    },
-    {
-      id: 6,
-      name: 'David Martinez',
-      email: 'david.m@email.com',
-      phone: '+1 (555) 678-9012',
-      goal: 'Athletic Performance',
-      status: 'Active',
-      joinDate: 'Dec 1, 2024',
-      currentWeight: '185 lbs',
-      targetWeight: '180 lbs',
-      progress: 80,
-      activePlans: 2,
-      totalCalories: 2600,
-      avatar: 'DM',
-      avatarColor: 'bg-rose-500',
-    },
-    {
-      id: 7,
-      name: 'Rachel Kim',
-      email: 'rachel.k@email.com',
-      phone: '+1 (555) 789-0123',
-      goal: 'Muscle Gain',
-      status: 'Active',
-      joinDate: 'Jan 12, 2025',
-      currentWeight: '128 lbs',
-      targetWeight: '140 lbs',
-      progress: 50,
-      activePlans: 1,
-      totalCalories: 2500,
-      avatar: 'RK',
-      avatarColor: 'bg-indigo-500',
-    },
-    {
-      id: 8,
-      name: 'Tom Baker',
-      email: 'tom.baker@email.com',
-      phone: '+1 (555) 890-1234',
-      goal: 'Fat Loss',
-      status: 'Active',
-      joinDate: 'Nov 25, 2024',
-      currentWeight: '225 lbs',
-      targetWeight: '200 lbs',
-      progress: 40,
-      activePlans: 2,
-      totalCalories: 2000,
-      avatar: 'TB',
-      avatarColor: 'bg-cyan-500',
-    },
-  ];
+  // Fetch clients data from the backend
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get('/auth/users');
+        
+        // Filter only users with role 'user' (exclude coaches and admins)
+        const users = response.data.filter(user => user.role === 'user');
+        
+        // Transform the data to match the component's expected format
+        const transformedClients = users.map(user => {
+          const nameParts = user.name ? user.name.split(' ') : ['User'];
+          const initials = nameParts.length >= 2 
+            ? `${nameParts[0][0]}${nameParts[1][0]}`
+            : nameParts[0][0];
+          
+          return {
+            id: user.id,
+            name: user.name || 'Unknown',
+            email: user.email,
+            phone: user.phone || 'N/A',
+            goal: user.goal || 'Not Set',
+            status: user.is_active ? 'Active' : 'Inactive',
+            joinDate: new Date(user.created_at).toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: 'short', 
+              day: 'numeric' 
+            }),
+            currentWeight: user.weight ? `${user.weight} lbs` : 'N/A',
+            targetWeight: 'N/A',
+            progress: 50,
+            activePlans: 0, // Will be calculated from meal plans
+            totalCalories: 0,
+            avatar: initials,
+            avatarColor: getAvatarColor(user.id),
+          };
+        });
+        
+        setClientsData(transformedClients);
+      } catch (error) {
+        console.error('Error fetching clients:', error);
+        // Keep empty array on error
+        setClientsData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClients();
+  }, []);
+
+  // Helper function to get avatar color based on user ID
+  const getAvatarColor = (id) => {
+    const colors = [
+      'bg-emerald-500',
+      'bg-teal-500',
+      'bg-orange-500',
+      'bg-blue-500',
+      'bg-purple-500',
+      'bg-rose-500',
+      'bg-indigo-500',
+      'bg-cyan-500',
+    ];
+    return colors[id % colors.length];
+  };
 
   // Filter clients based on search and status
   const filteredClients = clientsData.filter(client => {
@@ -251,9 +189,23 @@ export function Clients({ onNavigate }) {
         </CardContent>
       </Card>
 
-      {/* Clients Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {filteredClients.map((client, index) => (
+      {/* Loading State */}
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto"></div>
+          <p className="mt-4 text-slate-600 dark:text-slate-300">Loading clients...</p>
+        </div>
+      ) : filteredClients.length === 0 ? (
+        <Card className="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+          <CardContent className="p-12 text-center">
+            <User className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">No clients found</h3>
+            <p className="text-slate-600 dark:text-slate-300">Try adjusting your search or filter criteria</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          {filteredClients.map((client, index) => (
           <Card 
             key={client.id}
             className="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer animate-scale-in"
@@ -339,16 +291,6 @@ export function Clients({ onNavigate }) {
           </Card>
         ))}
       </div>
-
-      {/* No Results Message */}
-      {filteredClients.length === 0 && (
-        <Card className="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-          <CardContent className="p-12 text-center">
-            <User className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">No clients found</h3>
-            <p className="text-slate-600 dark:text-slate-300">Try adjusting your search or filter criteria</p>
-          </CardContent>
-        </Card>
       )}
     </div>
   );

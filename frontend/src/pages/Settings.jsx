@@ -10,6 +10,7 @@ import authService from '../services/auth.service';
 
 export function Settings() {
   const [activeTab, setActiveTab] = useState('profile');
+  const [currentUser, setCurrentUser] = useState(null);
 
   // Profile state
   const [profile, setProfile] = useState({
@@ -32,6 +33,7 @@ export function Settings() {
       try {
         const user = await authService.getCurrentUser();
         if (user) {
+          setCurrentUser(user); // Store current user for role check
           // Split the full name into first and last name
           const nameParts = user.name ? user.name.split(' ') : ['', ''];
           setProfile({
@@ -159,7 +161,9 @@ export function Settings() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+        <TabsList className={`grid w-full gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg ${
+          currentUser?.role === 'user' ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'
+        }`}>
           <TabsTrigger value="profile" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
             Profile
           </TabsTrigger>
@@ -169,9 +173,11 @@ export function Settings() {
           <TabsTrigger value="security" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
             Security
           </TabsTrigger>
-          <TabsTrigger value="billing" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
-            Billing
-          </TabsTrigger>
+          {currentUser?.role !== 'user' && (
+            <TabsTrigger value="billing" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
+              Billing
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* Profile Tab */}

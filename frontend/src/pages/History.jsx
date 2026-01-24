@@ -86,7 +86,7 @@ export function History() {
               <div>
                 <p className="text-sm text-slate-500 dark:text-slate-400">Active Plans</p>
                 <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
-                  {mealPlans.filter(plan => plan.status === 'Active').length}
+                  {mealPlans.filter(plan => (new Date() - new Date(plan.created_at)) < 7 * 24 * 60 * 60 * 1000).length}
                 </p>
               </div>
               <div className="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
@@ -140,19 +140,25 @@ export function History() {
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle className="text-slate-900 dark:text-white">{plan.title}</CardTitle>
+                      <CardTitle className="text-slate-900 dark:text-white">
+                        {plan.goal} Plan
+                      </CardTitle>
                       <CardDescription className="mt-1">
-                        {plan.dateCreated}
+                        {new Date(plan.created_at).toLocaleDateString('en-US', { 
+                          year: 'numeric', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        })}
                       </CardDescription>
                     </div>
                     <Badge 
                       className={`${
-                        plan.status === 'Active' 
+                        plan.created_at && (new Date() - new Date(plan.created_at)) < 7 * 24 * 60 * 60 * 1000
                           ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300' 
                           : 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300'
                       }`}
                     >
-                      {plan.status}
+                      {plan.created_at && (new Date() - new Date(plan.created_at)) < 7 * 24 * 60 * 60 * 1000 ? 'Recent' : 'Archived'}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -164,11 +170,17 @@ export function History() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-600 dark:text-slate-300">Diet Type:</span>
-                      <span className="font-medium text-slate-900 dark:text-white">{plan.dietType}</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{plan.diet_type}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-600 dark:text-slate-300">Calories:</span>
-                      <span className="font-medium text-slate-900 dark:text-white">{plan.calories} kcal/day</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{plan.daily_calories} kcal/day</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 dark:text-slate-300">Macros:</span>
+                      <span className="font-medium text-slate-900 dark:text-white">
+                        P: {plan.macro_protein}g | C: {plan.macro_carbs}g | F: {plan.macro_fats}g
+                      </span>
                     </div>
                   </div>
                 </CardContent>
