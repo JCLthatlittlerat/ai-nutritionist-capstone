@@ -65,6 +65,9 @@ const getCurrentUser = async () => {
   } catch (error) {
     console.error('Error getting current user:', error);
     return null;
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    return null;
   }
 };
 
@@ -112,4 +115,48 @@ const getUserMealPlans = async () => {
   }
 };
 
-export default { login, googleLogin, register, logout, getCurrentUser, getToken, updateProfile, uploadProfilePicture, getUserMealPlans };
+const getToken = () => {
+  // Check both localStorage and sessionStorage for token
+  return localStorage.getItem('token') || sessionStorage.getItem('token');
+};
+
+const updateProfile = async (profileData) => {
+  const response = await api.put('/auth/profile', profileData);
+  // Update stored user data after successful update
+  const storage = localStorage.getItem('token') ? localStorage : sessionStorage;
+  storage.setItem('user', JSON.stringify(response.data));
+  return response.data;
+};
+
+const uploadProfilePicture = async (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const response = await api.post('/auth/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+  
+  // Update stored user data with the new profile picture
+  const currentUser = await getCurrentUser();
+  if (currentUser) {
+    currentUser.profile_picture = response.data.file_path;
+    const storage = localStorage.getItem('token') ? localStorage : sessionStorage;
+    storage.setItem('user', JSON.stringify(currentUser));
+  }
+  
+  return response.data;
+};
+
+const getUserMealPlans = async () => {
+  try {
+    const response = await api.get('/mealplan/user');
+    return response.data;
+  } catch (error) {
+    console.error('Error getting user meal plans:', error);
+    throw error;
+  }
+};
+
+export default { login, register, logout, getCurrentUser, getToken, updateProfile, uploadProfilePicture, getUserMealPlans };

@@ -198,17 +198,14 @@ export function Settings() {
     try {
       await api.post('/auth/remove-profile-picture');
       setPreviewImage(null);
-      
-      // Update local storage
-      const userJson = localStorage.getItem('user') || sessionStorage.getItem('user');
-      if (userJson) {
-        const user = JSON.parse(userJson);
-        user.profile_picture = null;
-        const storage = localStorage.getItem('token') ? localStorage : sessionStorage;
-        storage.setItem('user', JSON.stringify(user));
-      }
-      
       alert('Profile picture removed successfully!');
+      
+      // Refresh user data
+      const user = await authService.getCurrentUser();
+      if (user && user.profile_picture) {
+        const fileName = user.profile_picture.split('/').pop();
+        setPreviewImage(`/uploads/${fileName}`);
+      }
     } catch (error) {
       console.error('Error removing profile picture:', error);
       alert('Failed to remove profile picture. Please try again.');
