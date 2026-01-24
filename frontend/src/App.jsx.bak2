@@ -1,16 +1,13 @@
 import { useState, useEffect } from 'react';
 import { LandingPage } from './pages/LandingPage';
 import { Dashboard } from './pages/Dashboard';
-import { UserDashboard } from './pages/UserDashboard';
 import { CreateMealPlan } from './pages/CreateMealPlan';
 import { MealPlanView } from './pages/MealPlanView';
 import { Sidebar } from './pages/Sidebar';
 import { Login } from './pages/Login';
 import { SignUp } from './pages/SignUp';
-import { ForgotPassword } from './pages/ForgotPassword';
 import { Clients } from './pages/Clients';
 import { Settings } from './pages/Settings';
-import { History } from './pages/History';
 import { Sparkles, LogOut, Menu } from 'lucide-react';
 import { Button } from './components/ui/button';
 import { ThemeProvider } from './providers/ThemeProvider';
@@ -21,7 +18,6 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [selectedMealPlanId, setSelectedMealPlanId] = useState(null);
 
   // Check authentication status on initial load
   useEffect(() => {
@@ -36,11 +32,8 @@ export default function App() {
     checkAuthStatus();
   }, []);
 
-  const handleNavigate = (page, data) => {
+  const handleNavigate = (page) => {
     setCurrentPage(page);
-    if (page === 'demo' && data?.mealPlanId) {
-      setSelectedMealPlanId(data.mealPlanId);
-    }
   };
 
   const handleLogin = async () => {
@@ -79,19 +72,11 @@ export default function App() {
         </ThemeProvider>
       );
     }
-
+  
     if (currentPage === 'signup') {
       return (
         <ThemeProvider>
           <SignUp onNavigate={handleNavigate} onSignUp={handleSignUp} />
-        </ThemeProvider>
-      );
-    }
-
-    if (currentPage === 'forgot-password') {
-      return (
-        <ThemeProvider>
-          <ForgotPassword onNavigate={handleNavigate} />
         </ThemeProvider>
       );
     }
@@ -149,15 +134,11 @@ export default function App() {
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto lg:pt-0 pt-16">
-          {currentPage === 'dashboard' && (
-            currentUser?.role === 'user' 
-              ? <UserDashboard onNavigate={handleNavigate} />
-              : <Dashboard onNavigate={handleNavigate} currentUser={currentUser} />
-          )}
+          {currentPage === 'dashboard' && <Dashboard onNavigate={handleNavigate} />}
           {(currentUser?.role !== 'user' && currentPage === 'create') && <CreateMealPlan onNavigate={handleNavigate} onGenerate={handleGeneratePlan} />}
           {(currentUser?.role !== 'user' && currentPage === 'clients') && <Clients onNavigate={handleNavigate} />}
-          {currentPage === 'demo' && <MealPlanView mealPlanId={selectedMealPlanId} onNavigate={handleNavigate} />}
-          {currentPage === 'history' && <History onNavigate={handleNavigate} />}
+          {currentPage === 'demo' && <MealPlanView />}
+          {currentPage === 'history' && <History />}
           {currentPage === 'settings' && <Settings />}
           {currentUser?.role === 'user' && currentPage !== 'dashboard' && currentPage !== 'history' && currentPage !== 'settings' && (
             <div className="p-8 text-center">
@@ -170,3 +151,4 @@ export default function App() {
     </ThemeProvider>
   );
 }
+// checkpoint before the backend integration.

@@ -6,25 +6,108 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Textarea } from '../components/ui/textarea';
+import api from '../services/api';
 
 export function CreateMealPlan({ onGenerate }) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     clientName: '',
+    clientEmail: '',
     goal: '',
     dietType: '',
     calories: '',
+    protein: '',
+    carbs: '',
+    fats: '',
     mealsPerDay: '3',
     allergies: '',
   });
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
+    setError('');
     setIsGenerating(true);
-    // Simulate AI generation
-    setTimeout(() => {
+    
+    try {
+      // First, register the client if they don't exist
+      const clientData = {
+        name: formData.clientName,
+        email: formData.clientEmail,
+        password: 'TempPassword123!',  // Temporary password
+        role: 'user'
+      };
+      
+      let clientCreated = false;
+      // Try to register the client
+      try {
+        await api.post('/auth/register', clientData);
+        clientCreated = true;
+      } catch (regError) {
+        // If user already exists, that's okay - we'll continue
+        if (!regError.response?.data?.detail?.includes('already exists')) {
+          throw regError;
+        }
+      }
+      
+      // If client was just created, log in as that client to create the meal plan
+      // Otherwise, the meal plan will be created for the logged-in coach
+      let originalToken = null;
+      if (clientCreated) {
+        // Save current coach token
+        originalToken = localStorage.getItem('token') || sessionStorage.getItem('token');
+        
+        // Login as the client
+        const loginResponse = await api.post('/auth/login', {
+          email: formData.clientEmail,
+          password: 'TempPassword123!'
+        });
+        
+        // Temporarily use client token
+        localStorage.setItem('temp_client_token', loginResponse.data.access_token);
+      }
+      
+      // Create the meal plan
+      const mealPlanData = {
+        goal: formData.goal,
+        diet_type: formData.dietType,
+        daily_calories: parseInt(formData.calories),
+        macros: {
+          protein: parseInt(formData.protein) || Math.round(parseInt(formData.calories) * 0.3 / 4),
+          carbs: parseInt(formData.carbs) || Math.round(parseInt(formData.calories) * 0.4 / 4),
+          fats: parseInt(formData.fats) || Math.round(parseInt(formData.calories) * 0.3 / 9)
+        }
+      };
+      
+      // Use client token if we just created them
+      const config = clientCreated ? {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('temp_client_token')}`
+        }
+      } : {};
+      
+      const response = await api.post('/mealplan/', mealPlanData, config);
+      console.log('Meal plan created:', response.data);
+      
+      // Restore original token if we switched
+      if (originalToken) {
+        if (localStorage.getItem('token')) {
+          localStorage.setItem('token', originalToken);
+        } else {
+          sessionStorage.setItem('token', originalToken);
+        }
+        localStorage.removeItem('temp_client_token');
+      }
+      
+      // Success - navigate to the meal plan view
+      setTimeout(() => {
+        setIsGenerating(false);
+        onGenerate();
+      }, 1000);
+    } catch (err) {
       setIsGenerating(false);
-      onGenerate();
-    }, 2500);
+      setError(err.response?.data?.detail || 'Failed to generate meal plan. Please try again.');
+      console.error('Error generating meal plan:', err);
+    }
   };
 
   return (
@@ -49,6 +132,15 @@ export function CreateMealPlan({ onGenerate }) {
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Error Message */}
+            {error && (
+              <div className="p-3 rounded-lg bg-red-50 border border-red-100 dark:bg-red-900/20 dark:border-red-900/30">
+                <p className="text-sm text-red-600 dark:text-red-400 text-center font-medium">
+                  {error}
+                </p>
+              </div>
+            )}
+
             {/* Client Name */}
             <div className="space-y-2">
               <Label htmlFor="clientName">Client Name</Label>
@@ -58,6 +150,21 @@ export function CreateMealPlan({ onGenerate }) {
                 value={formData.clientName}
                 onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
               />
+            </div>
+
+            {/* Client Email */}
+            <div className="space-y-2">
+              <Label htmlFor="clientEmail">Client Email</Label>
+              <Input
+                id="clientEmail"
+                type="email"
+                placeholder="e.g., john@example.com"
+                value={formData.clientEmail}
+                onChange={(e) => setFormData({ ...formData, clientEmail: e.target.value })}
+              />
+              <p className="text-sm text-slate-500">
+                Required for client account creation and meal plan delivery
+              </p>
             </div>
 
             {/* Goal */}
@@ -123,6 +230,43 @@ export function CreateMealPlan({ onGenerate }) {
               </div>
             </div>
 
+            {/* Macros (Optional) */}
+            <div className="space-y-2">
+              <Label>Macronutrients (Optional - Auto-calculated if left empty)</Label>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <Label htmlFor="protein" className="text-xs">Protein (g)</Label>
+                  <Input
+                    id="protein"
+                    type="number"
+                    placeholder="Auto"
+                    value={formData.protein}
+                    onChange={(e) => setFormData({ ...formData, protein: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="carbs" className="text-xs">Carbs (g)</Label>
+                  <Input
+                    id="carbs"
+                    type="number"
+                    placeholder="Auto"
+                    value={formData.carbs}
+                    onChange={(e) => setFormData({ ...formData, carbs: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="fats" className="text-xs">Fats (g)</Label>
+                  <Input
+                    id="fats"
+                    type="number"
+                    placeholder="Auto"
+                    value={formData.fats}
+                    onChange={(e) => setFormData({ ...formData, fats: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* Allergies & Preferences */}
             <div className="space-y-2">
               <Label htmlFor="allergies">Allergies & Food Preferences (Optional)</Label>
@@ -143,7 +287,7 @@ export function CreateMealPlan({ onGenerate }) {
               <Button
                 className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 h-12"
                 onClick={handleGenerate}
-                disabled={isGenerating || !formData.clientName || !formData.goal || !formData.dietType || !formData.calories}
+                disabled={isGenerating || !formData.clientName || !formData.clientEmail || !formData.goal || !formData.dietType || !formData.calories}
               >
                 {isGenerating ? (
                   <>

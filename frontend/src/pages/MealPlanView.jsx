@@ -1,18 +1,156 @@
+import { useState, useEffect } from 'react';
 import { Download, Share2, RotateCcw, ShoppingCart, Check, Calendar } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import api from '../services/api';
 
-export function MealPlanView({ onRegenerate }) {
+export function MealPlanView({ mealPlanId, onRegenerate, onNavigate }) {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [mealPlan, setMealPlan] = useState(null);
+  const [macroData, setMacroData] = useState([]);
+  const [weeklyData, setWeeklyData] = useState([]);
+  const [mealsByDay, setMealsByDay] = useState({});
+
+  useEffect(() => {
+    const fetchMealPlan = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await api.get(`/mealplan/${mealPlanId}`);
+        const data = response.data;
+        
+        setMealPlan(data.mealplan);
+        
+        // Set macro data for pie chart
+        setMacroData([
+          { name: 'Protein', value: data.mealplan.macro_protein, color: '#10b981' },
+          { name: 'Carbs', value: data.mealplan.macro_carbs, color: '#14b8a6' },
+          { name: 'Fats', value: data.mealplan.macro_fats, color: '#f97316' },
+        ]);
+        
+        // Parse meal history and organize by day
+        const mealsByDayTemp = {};
+        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        
+        data.history.forEach((historyItem) => {
+          const dayName = days[historyItem.day_number - 1];
+          if (dayName) {
+            try {
+              const mealsData = JSON.parse(historyItem.meals_json);
+              mealsByDayTemp[dayName] = mealsData.meals || [];
+            } catch (e) {
+              console.error('Error parsing meals for day', historyItem.day_number, e);
+              mealsByDayTemp[dayName] = [];
+            }
+          }
+        });
+        
+        setMealsByDay(mealsByDayTemp);
+        
+        // Generate weekly data for bar chart (simplified)
+        const weeklyDataTemp = days.map((day) => ({
+          day: day.substring(0, 3).charAt(0).toUpperCase() + day.substring(1, 3),
+          protein: data.mealplan.macro_protein,
+          carbs: data.mealplan.macro_carbs,
+          fats: data.mealplan.macro_fats,
+          calories: data.mealplan.daily_calories,
+        }));
+        
+        setWeeklyData(weeklyDataTemp);
+      } catch (err) {
+        console.error('Error fetching meal plan:', err);
+        setError('Failed to load meal plan. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    if (mealPlanId) {
+      fetchMealPlan();
+    }
+  }, [mealPlanId]);
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'My Meal Plan',
+          text: `Check out my ${mealPlan?.goal} meal plan - ${mealPlan?.daily_calories} calories per day!`,
+          url: window.location.href,
+        });
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          alert('Unable to share. Please try copying the URL manually.');
+        }
+      }
+    } else {
+      // Fallback: copy URL to clipboard
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copied to clipboard!');
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      const response = await api.get(`/mealplan/pdf/${mealPlanId}`, {
+        responseType: 'blob',
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `meal-plan-${mealPlanId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error exporting PDF:', err);
+      alert('Failed to export PDF. This feature may not be available yet.');
+    }
+  };
+
+  const handleRegeneratePlan = () => {
+    if (onNavigate) {
+      onNavigate('create');
+    } else if (onRegenerate) {
+      onRegenerate();
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading meal plan...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !mealPlan) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error || 'Meal plan not found'}</p>
+          <Button onClick={() => onNavigate && onNavigate('history')}>Back to History</Button>
+        </div>
+      </div>
+    );
+  }
+
   // Mock data for macro breakdown
-  const macroData = [
+  const macroDataDisplay = macroData.length > 0 ? macroData : [
     { name: 'Protein', value: 180, color: '#10b981' },
     { name: 'Carbs', value: 250, color: '#14b8a6' },
     { name: 'Fats', value: 70, color: '#f97316' },
   ];
 
-  const weeklyData = [
+  const weeklyDataDisplay = weeklyData.length > 0 ? weeklyData : [
     { day: 'Mon', protein: 180, carbs: 250, fats: 70, calories: 2500 },
     { day: 'Tue', protein: 175, carbs: 260, fats: 68, calories: 2480 },
     { day: 'Wed', protein: 185, carbs: 245, fats: 72, calories: 2520 },
@@ -22,7 +160,7 @@ export function MealPlanView({ onRegenerate }) {
     { day: 'Sun', protein: 180, carbs: 250, fats: 70, calories: 2500 },
   ];
 
-  const mealPlan = {
+  const mealsByDayDisplay = Object.keys(mealsByDay).length > 0 ? mealsByDay : {
     monday: [
       { meal: 'Breakfast', name: 'Oatmeal with Berries & Almonds', calories: 450, protein: 15, carbs: 65, fats: 12 },
       { meal: 'Lunch', name: 'Grilled Chicken Quinoa Bowl', calories: 650, protein: 45, carbs: 70, fats: 18 },
@@ -107,18 +245,18 @@ export function MealPlanView({ onRegenerate }) {
             <span className="text-sm text-emerald-600 font-medium">Plan Generated</span>
           </div>
           <h1 className="text-3xl font-bold text-slate-900 mb-2">7-Day Meal Plan</h1>
-          <p className="text-slate-600">Sarah Johnson • Muscle Gain • 2,800 cal/day</p>
+          <p className="text-slate-600">{mealPlan.goal} • {mealPlan.diet_type} • {mealPlan.daily_calories} cal/day</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleShare}>
             <Share2 className="w-4 h-4 mr-2" />
             Share
           </Button>
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleExport}>
             <Download className="w-4 h-4 mr-2" />
             Export PDF
           </Button>
-          <Button variant="outline" onClick={onRegenerate}>
+          <Button variant="outline" onClick={handleRegeneratePlan}>
             <RotateCcw className="w-4 h-4 mr-2" />
             Regenerate
           </Button>
@@ -133,8 +271,8 @@ export function MealPlanView({ onRegenerate }) {
               <span className="text-sm text-emerald-700 font-medium">Daily Protein</span>
               <Check className="w-5 h-5 text-emerald-600" />
             </div>
-            <div className="text-3xl font-bold text-emerald-900">180g</div>
-            <p className="text-sm text-emerald-700 mt-1">36% of total calories</p>
+            <div className="text-3xl font-bold text-emerald-900">{mealPlan.macro_protein}g</div>
+            <p className="text-sm text-emerald-700 mt-1">{Math.round((mealPlan.macro_protein * 4 / mealPlan.daily_calories) * 100)}% of total calories</p>
           </CardContent>
         </Card>
         <Card className="border-none shadow-md bg-gradient-to-br from-teal-50 to-teal-100/50">
@@ -143,8 +281,8 @@ export function MealPlanView({ onRegenerate }) {
               <span className="text-sm text-teal-700 font-medium">Daily Carbs</span>
               <Check className="w-5 h-5 text-teal-600" />
             </div>
-            <div className="text-3xl font-bold text-teal-900">250g</div>
-            <p className="text-sm text-teal-700 mt-1">40% of total calories</p>
+            <div className="text-3xl font-bold text-teal-900">{mealPlan.macro_carbs}g</div>
+            <p className="text-sm text-teal-700 mt-1">{Math.round((mealPlan.macro_carbs * 4 / mealPlan.daily_calories) * 100)}% of total calories</p>
           </CardContent>
         </Card>
         <Card className="border-none shadow-md bg-gradient-to-br from-orange-50 to-orange-100/50">
@@ -153,8 +291,8 @@ export function MealPlanView({ onRegenerate }) {
               <span className="text-sm text-orange-700 font-medium">Daily Fats</span>
               <Check className="w-5 h-5 text-orange-600" />
             </div>
-            <div className="text-3xl font-bold text-orange-900">70g</div>
-            <p className="text-sm text-orange-700 mt-1">24% of total calories</p>
+            <div className="text-3xl font-bold text-orange-900">{mealPlan.macro_fats}g</div>
+            <p className="text-sm text-orange-700 mt-1">{Math.round((mealPlan.macro_fats * 9 / mealPlan.daily_calories) * 100)}% of total calories</p>
           </CardContent>
         </Card>
       </div>
@@ -171,7 +309,7 @@ export function MealPlanView({ onRegenerate }) {
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={macroData}
+                  data={macroDataDisplay}
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
@@ -179,7 +317,7 @@ export function MealPlanView({ onRegenerate }) {
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {macroData.map((entry, index) => (
+                  {macroDataDisplay.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -187,7 +325,7 @@ export function MealPlanView({ onRegenerate }) {
               </PieChart>
             </ResponsiveContainer>
             <div className="flex justify-center gap-6 mt-4">
-              {macroData.map((item) => (
+              {macroDataDisplay.map((item) => (
                 <div key={item.name} className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
                   <span className="text-sm text-slate-600">{item.name}: {item.value}g</span>
@@ -205,7 +343,7 @@ export function MealPlanView({ onRegenerate }) {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={weeklyData}>
+              <BarChart data={weeklyDataDisplay}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis dataKey="day" stroke="#64748b" />
                 <YAxis stroke="#64748b" />
@@ -245,25 +383,25 @@ export function MealPlanView({ onRegenerate }) {
               <TabsTrigger value="sunday">Sun</TabsTrigger>
             </TabsList>
             <TabsContent value="monday" className="mt-6">
-              <MealDay meals={mealPlan.monday} />
+              <MealDay meals={mealsByDayDisplay.monday || []} />
             </TabsContent>
             <TabsContent value="tuesday" className="mt-6">
-              <MealDay meals={mealPlan.tuesday} />
+              <MealDay meals={mealsByDayDisplay.tuesday || []} />
             </TabsContent>
             <TabsContent value="wednesday" className="mt-6">
-              <MealDay meals={mealPlan.wednesday} />
+              <MealDay meals={mealsByDayDisplay.wednesday || []} />
             </TabsContent>
             <TabsContent value="thursday" className="mt-6">
-              <MealDay meals={mealPlan.monday} />
+              <MealDay meals={mealsByDayDisplay.thursday || []} />
             </TabsContent>
             <TabsContent value="friday" className="mt-6">
-              <MealDay meals={mealPlan.tuesday} />
+              <MealDay meals={mealsByDayDisplay.friday || []} />
             </TabsContent>
             <TabsContent value="saturday" className="mt-6">
-              <MealDay meals={mealPlan.wednesday} />
+              <MealDay meals={mealsByDayDisplay.saturday || []} />
             </TabsContent>
             <TabsContent value="sunday" className="mt-6">
-              <MealDay meals={mealPlan.monday} />
+              <MealDay meals={mealsByDayDisplay.sunday || []} />
             </TabsContent>
           </Tabs>
         </CardContent>

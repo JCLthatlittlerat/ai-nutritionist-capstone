@@ -11,6 +11,7 @@ export function SignUp({ onNavigate, onSignUp }) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false); // Add rememberMe state
   const [accountType, setAccountType] = useState('coach'); // 'coach' or 'user'
   const [formData, setFormData] = useState({
     fullName: '',
@@ -91,12 +92,17 @@ export function SignUp({ onNavigate, onSignUp }) {
       await authService.register({
         name: formData.fullName,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        role: accountType  // Send the selected account type as role
       });
+      
+      // Automatically log in after registration
+      await authService.login(formData.email, formData.password, rememberMe);
       onSignUp();
     } catch (error) {
       const errorMessage = error.response?.data?.detail || 'Registration failed. Please try again.';
       setErrors({ ...errors, server: errorMessage });
+      console.log(error);
     } finally {
       setIsLoading(false);
     }

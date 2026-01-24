@@ -235,12 +235,19 @@ def register_user(request: Request, user: UserCreate, db: Session = Depends(get_
     verification_token = EmailVerification.generate_verification_token()
     verification_expires = datetime.utcnow() + timedelta(hours=24)  # Token valid for 24 hours
     
+    # Validate role
+    if user.role not in ["user", "coach"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid role. Valid roles: user, coach"
+        )
+    
     # Create new user
     db_user = User(
         name=user.name,
         email=user.email,
         password_hash=hashed_password,
-        role="user",  # Default role is user
+        role=user.role,  # Use the provided role
         is_active=True,
         is_verified=False,
         email_verification_token=verification_token,
@@ -402,11 +409,35 @@ def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 
+@router.get("/users", response_model=list[UserResponse])
+def get_all_users(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all users (for coaches to view their clients)"""
+    # Only allow coaches to access this endpoint
+    if current_user.role not in ['coach', 'admin']:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to access this resource"
+        )
+    
+    # Get all users from database
+    users = db.query(User).all()
+    return users
+
+
 # Schema for updating user profile
 from pydantic import BaseModel
 
 class UserProfileUpdate(BaseModel):
     name: str = None
+    email: str = None
+    phone: str = None
+    company: str = None
+    title: str = None
+    location: str = None
+    bio: str = None
     height: float = None
     weight: float = None
     age: int = None
@@ -424,7 +455,8 @@ def update_user_profile(
     """Update user profile information"""
     # Update allowed fields
     allowed_fields = {
-        "name", "height", "weight", "age", "gender", "activity_level", "goal"
+        "name", "email", "phone", "company", "title", "location", "bio",
+        "height", "weight", "age", "gender", "activity_level", "goal"
     }
     
     for field in allowed_fields:
@@ -436,6 +468,62 @@ def update_user_profile(
     db.refresh(current_user)
     
     return current_user
+
+
+class PasswordChangeRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+
+@router.post("/change-password")
+def change_password(
+    password_data: PasswordChangeRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Change user password"""
+    # Verify current password
+    if not verify_password(password_data.current_password, current_user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect"
+        )
+    
+    # Validate new password
+    if not validate_password(password_data.new_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 8 characters with uppercase, lowercase, number, and special character, and not exceed 72 bytes"
+        )
+    
+    # Hash and update password
+    hashed_password = get_password_hash(password_data.new_password)
+    current_user.password_hash = hashed_password
+    db.commit()
+    
+    return {"message": "Password changed successfully"}
+
+
+@router.post("/remove-profile-picture")
+async def remove_profile_picture(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Remove user's profile picture"""
+    # If user has a profile picture, delete the file
+    if current_user.profile_picture:
+        file_path = Path(current_user.profile_picture)
+        if file_path.exists():
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                logging.error(f"Error deleting profile picture file: {str(e)}")
+    
+    # Clear the profile picture field in database
+    current_user.profile_picture = None
+    db.commit()
+    
+    return {"message": "Profile picture removed successfully"}
 
 
 @router.post("/logout")

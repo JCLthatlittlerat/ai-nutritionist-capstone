@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Button } from '../components/ui/button';
 import { ThemeToggle } from '../components/ThemeToggle';
 
-export function Dashboard({ onNavigate }) {
+export function Dashboard({ onNavigate, currentUser }) {
   const stats = [
     {
       title: 'Active Clients',
@@ -70,13 +70,24 @@ export function Dashboard({ onNavigate }) {
     },
   ];
 
+  const getCoachGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 18) return "Good Afternoon";
+    return "Good Evening";
+  };
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 animate-fade-in">
       {/* Header */}
       <div className="mb-6 sm:mb-8 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">Dashboard</h1>
-          <p className="text-slate-600 dark:text-slate-300">Welcome back! Here's your coaching overview.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">
+            {getCoachGreeting()}{currentUser?.name ? `, ${currentUser.name.split(' ')[0]}` : ''}!
+          </h1>
+          <p className="text-slate-600 dark:text-slate-300">
+            Here's your coaching overview.
+          </p>
         </div>
         <ThemeToggle />
       </div>

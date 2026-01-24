@@ -1,26 +1,67 @@
-import { useState } from 'react';
-import { User, Mail, Phone, MapPin, Lock, Bell, CreditCard, Shield, Globe, Moon, Save, Camera, Building, Briefcase } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { User, Mail, Phone, MapPin, Lock, Bell, CreditCard, Shield, Globe, Moon, Save, Camera, Building, Briefcase, X } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Switch } from '../components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import authService from '../services/auth.service';
+import api from '../services/api';
 
-export function Settings({ onNavigate }) {
+export function Settings() {
   const [activeTab, setActiveTab] = useState('profile');
+  const [currentUser, setCurrentUser] = useState(null);
 
   // Profile state
   const [profile, setProfile] = useState({
-    firstName: 'Alex',
-    lastName: 'Thompson',
-    email: 'alex.thompson@nutritionist.com',
-    phone: '+1 (555) 123-4567',
-    company: 'Elite Fitness Coaching',
-    title: 'Senior Nutrition Coach',
-    location: 'San Francisco, CA',
-    bio: 'Certified nutrition coach with 10+ years of experience helping clients achieve their fitness goals through personalized meal planning.',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    company: '',
+    title: '',
+    location: '',
+    bio: '',
   });
+
+  // State for profile picture
+  const [previewImage, setPreviewImage] = useState(null);
+
+  // Load user profile on component mount
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      try {
+        const user = await authService.getCurrentUser();
+        if (user) {
+          setCurrentUser(user); // Store current user for role check
+          // Split the full name into first and last name
+          const nameParts = user.name ? user.name.split(' ') : ['', ''];
+          setProfile({
+            firstName: nameParts[0] || '',
+            lastName: nameParts.slice(1).join(' ') || '',
+            email: user.email || '',
+            phone: user.phone || '',
+            company: user.company || '',
+            title: user.title || '',
+            location: user.location || '',
+            bio: user.bio || '',
+          });
+
+          // Set profile picture if available
+          if (user.profile_picture) {
+            // Extract filename from the full path and construct the correct URL
+            const fileName = user.profile_picture.split('/').pop();
+            setPreviewImage(`/uploads/${fileName}`);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user profile:', error);
+      }
+    };
+
+    loadUserProfile();
+  }, []);
 
   // Notification settings
   const [notifications, setNotifications] = useState({
@@ -39,14 +80,136 @@ export function Settings({ onNavigate }) {
     sessionTimeout: true,
   });
 
-  const handleProfileUpdate = () => {
-    // Handle profile update
-    alert('Profile updated successfully!');
+  // Password change state
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordError, setPasswordError] = useState('');
+
+  const handleProfileUpdate = async () => {
+    try {
+      // Combine first and last name
+      const fullName = `${profile.firstName} ${profile.lastName}`.trim();
+      
+      // Prepare profile data to send to backend
+      const profileData = {
+        name: fullName,
+        email: profile.email,
+        phone: profile.phone,
+        company: profile.company,
+        title: profile.title,
+        location: profile.location,
+        bio: profile.bio,
+        height: profile.height,
+        weight: profile.weight,
+        age: profile.age,
+        gender: profile.gender,
+        activity_level: profile.activity_level,
+        goal: profile.goal,
+      };
+      
+      // Update profile via API
+      await authService.updateProfile(profileData);
+      
+      // Show success message
+      alert('Profile updated successfully!');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Failed to update profile. Please try again.');
+    }
   };
 
-  const handlePasswordChange = () => {
-    // Handle password change
-    alert('Password change requested!');
+  const handlePasswordChange = async () => {
+    setPasswordError('');
+    
+    // Validate passwords match
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordError('New passwords do not match');
+      return;
+    }
+    
+    // Validate new password strength
+    if (passwordData.newPassword.length < 8) {
+      setPasswordError('Password must be at least 8 characters');
+      return;
+    }
+    
+    try {
+      await api.post('/auth/change-password', {
+        current_password: passwordData.currentPassword,
+        new_password: passwordData.newPassword
+      });
+      
+      // Clear password fields
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      
+      alert('Password updated successfully!');
+    } catch (error) {
+      console.error('Error updating password:', error);
+      setPasswordError(error.response?.data?.detail || 'Failed to update password. Please try again.');
+    }
+  };
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file (JPEG, PNG, GIF)');
+        return;
+      }
+      
+      // Validate file size (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        alert('File size exceeds 2MB limit');
+        return;
+      }
+      
+      try {
+        // Preview the image
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPreviewImage(reader.result);
+        };
+        reader.readAsDataURL(file);
+        
+        // Upload to server
+        await authService.uploadProfilePicture(file);
+        
+        alert('Profile picture updated successfully!');
+      } catch (error) {
+        console.error('Error uploading profile picture:', error);
+        alert('Failed to upload profile picture. Please try again.');
+      }
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    if (!confirm('Are you sure you want to remove your profile picture?')) {
+      return;
+    }
+    
+    try {
+      await api.post('/auth/remove-profile-picture');
+      setPreviewImage(null);
+      alert('Profile picture removed successfully!');
+      
+      // Refresh user data
+      const user = await authService.getCurrentUser();
+      if (user && user.profile_picture) {
+        const fileName = user.profile_picture.split('/').pop();
+        setPreviewImage(`/uploads/${fileName}`);
+      }
+    } catch (error) {
+      console.error('Error removing profile picture:', error);
+      alert('Failed to remove profile picture. Please try again.');
+    }
   };
 
   return (
@@ -59,7 +222,9 @@ export function Settings({ onNavigate }) {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+        <TabsList className={`grid w-full gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg ${
+          currentUser?.role === 'user' ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'
+        }`}>
           <TabsTrigger value="profile" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
             Profile
           </TabsTrigger>
@@ -69,9 +234,11 @@ export function Settings({ onNavigate }) {
           <TabsTrigger value="security" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
             Security
           </TabsTrigger>
-          <TabsTrigger value="billing" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
-            Billing
-          </TabsTrigger>
+          {currentUser?.role !== 'user' && (
+            <TabsTrigger value="billing" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
+              Billing
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* Profile Tab */}
@@ -82,21 +249,53 @@ export function Settings({ onNavigate }) {
               <CardTitle>Profile Picture</CardTitle>
               <CardDescription>Update your profile photo</CardDescription>
             </CardHeader>
-            <CardContent>
+          <CardContent>
               <div className="flex items-center gap-6">
                 <div className="relative">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-3xl">
-                    AT
-                  </div>
-                  <button className="absolute bottom-0 right-0 w-8 h-8 bg-white dark:bg-slate-700 rounded-full shadow-lg border-2 border-white dark:border-slate-600 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors">
+                  {previewImage ? (
+                    <>
+                      <img 
+                        src={previewImage} 
+                        alt="Profile" 
+                        className="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-slate-700"
+                      />
+                      <button
+                        onClick={handleRemoveImage}
+                        className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors"
+                        title="Remove picture"
+                      >
+                        <X className="w-4 h-4 text-white" />
+                      </button>
+                    </>
+                  ) : (
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-3xl">
+                      {profile.firstName && profile.lastName 
+                        ? `${profile.firstName.charAt(0)}${profile.lastName.charAt(0)}` 
+                        : profile.firstName ? profile.firstName.charAt(0) : 'U'
+                      }
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    id="profile-upload"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                  />
+                  <label 
+                    htmlFor="profile-upload" 
+                    className="absolute bottom-0 right-0 w-8 h-8 bg-white dark:bg-slate-700 rounded-full shadow-lg border-2 border-white dark:border-slate-600 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors cursor-pointer"
+                  >
                     <Camera className="w-4 h-4 text-slate-600 dark:text-slate-300" />
-                  </button>
+                  </label>
                 </div>
                 <div>
-                  <Button variant="outline" className="mb-2">
-                    Upload Photo
+                  <Button variant="outline" asChild>
+                    <label htmlFor="profile-upload" className="cursor-pointer">
+                      Upload Photo
+                    </label>
                   </Button>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">JPG, PNG or GIF. Max size 2MB.</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">JPG, PNG or GIF. Max size 2MB.</p>
                 </div>
               </div>
             </CardContent>
@@ -321,6 +520,15 @@ export function Settings({ onNavigate }) {
               <CardDescription>Update your password to keep your account secure</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Error Message */}
+              {passwordError && (
+                <div className="p-3 rounded-lg bg-red-50 border border-red-100 dark:bg-red-900/20 dark:border-red-900/30">
+                  <p className="text-sm text-red-600 dark:text-red-400 text-center font-medium">
+                    {passwordError}
+                  </p>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="currentPassword">Current Password</Label>
                 <div className="relative">
@@ -330,6 +538,8 @@ export function Settings({ onNavigate }) {
                     type="password"
                     placeholder="Enter current password"
                     className="pl-10"
+                    value={passwordData.currentPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
                   />
                 </div>
               </div>
@@ -343,6 +553,8 @@ export function Settings({ onNavigate }) {
                     type="password"
                     placeholder="Enter new password"
                     className="pl-10"
+                    value={passwordData.newPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                   />
                 </div>
               </div>
@@ -356,6 +568,8 @@ export function Settings({ onNavigate }) {
                     type="password"
                     placeholder="Confirm new password"
                     className="pl-10"
+                    value={passwordData.confirmPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
                   />
                 </div>
               </div>
