@@ -85,7 +85,7 @@ export function CreateMealPlan({ onGenerate }) {
         }
       } : {};
       
-      const response = await api.post('/mealplan/', mealPlanData, config);
+      const response = await api.post('/api/mealplan/', mealPlanData, config);
       console.log('Meal plan created:', response.data);
       
       // Restore original token if we switched
