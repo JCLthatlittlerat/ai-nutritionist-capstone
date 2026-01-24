@@ -5,9 +5,10 @@ from database.database import engine
 from database.models import Base
 from core.security import get_rate_limit_middleware
 
+app = FastAPI(title="AI-Nutritionist Backend - Week1")
 
-from routers import mealplan, auth
-from core.config import settings
+# include routers
+app.include_router(auth.router, prefix="/auth", tags=["auth"])
 
 app = FastAPI(
     title="AI Nutritionist Backend",
@@ -102,5 +103,9 @@ app.include_router(mealplan.router, prefix="/api")
 app.include_router(auth.router)
 
 @app.get("/")
-def home():
-    return {"message": "AI Nutritionist Backend Running"}
+def root():
+    return {"message": "AI-Nutritionist backend (Week 1) is running"}
+
+app.include_router(clients.router, tags=["clients"])
+app.include_router(nutrition.router, tags=["nutrition"])
+app.include_router(macros.router, tags=["macros"])
