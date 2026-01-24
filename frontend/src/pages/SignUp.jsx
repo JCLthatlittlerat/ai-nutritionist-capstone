@@ -156,14 +156,14 @@ export function SignUp({ onNavigate, onSignUp }) {
             </div>
             <span className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">AI Nutritionist</span>
           </div>
-          <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base">For Professional Fitness Coaches</p>
+          <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base">For Fitness Coaches and Health Enthusiast</p>
         </div>
 
         {/* Sign Up Card */}
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 p-6 sm:p-8 animate-scale-in" style={{ animationDelay: '0.1s' }}>
           <div className="mb-6">
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-2">Create Your Coach Account</h1>
-            <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base">Join thousands of coaches transforming their practice</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-2">Create Your Account</h1>
+            <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base">Join thousands of coaches transforming their practice & People Leading Healthy Lifestyle.</p>
           </div>
 
           <div className="space-y-5">
