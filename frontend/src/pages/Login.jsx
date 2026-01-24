@@ -5,6 +5,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Checkbox } from '../components/ui/checkbox';
 import authService from '../services/auth.service';
+import { GoogleLogin } from '@react-oauth/google';
 
 export function Login({ onNavigate, onLogin }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -61,6 +62,19 @@ export function Login({ onNavigate, onLogin }) {
     } catch (error) {
       const errorMessage = error.response?.data?.detail || 'Login failed. Please check your credentials.';
       setErrors({ ...errors, server: errorMessage });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setIsLoading(true);
+    try {
+      await authService.googleLogin(credentialResponse.credential, rememberMe);
+      onLogin();
+    } catch (error) {
+      console.error('Google login error:', error);
+      setErrors({ ...errors, server: 'Google login failed. Please try again.' });
     } finally {
       setIsLoading(false);
     }
@@ -212,21 +226,18 @@ export function Login({ onNavigate, onLogin }) {
             </div>
 
             {/* Social Login */}
-            <Button
-              variant="outline"
-              className="w-full h-11 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all hover:shadow-md"
-              onClick={() => {
-                setIsLoading(true);
-                setTimeout(() => {
-                  setIsLoading(false);
-                  onLogin();
-                }, 1500);
-              }}
-              disabled={isLoading}
-            >
-              <Chrome className="w-5 h-5 mr-2" />
-              Continue with Google
-            </Button>
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => {
+                  setErrors({ ...errors, server: 'Google login failed.' });
+                }}
+                useOneTap
+                theme="filled_blue"
+                shape="pill"
+                width="100%"
+              />
+            </div>
 
             {/* Sign Up Link */}
             <div className="text-center pt-4 border-t border-slate-100 dark:border-slate-700">

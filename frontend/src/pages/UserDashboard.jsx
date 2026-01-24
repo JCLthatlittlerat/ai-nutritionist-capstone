@@ -6,7 +6,7 @@ import { Badge } from '../components/ui/badge';
 import { ThemeToggle } from '../components/ThemeToggle';
 import authService from '../services/auth.service';
 
-export function UserDashboard({ onNavigate }) {
+export function UserDashboard({ onNavigate, currentUser }) {
   const [userPlans, setUserPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -98,7 +98,7 @@ export function UserDashboard({ onNavigate }) {
       <div className="mb-6 sm:mb-8 flex items-start justify-between">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">
-            {getUserGreeting()}!
+            {getUserGreeting()}{currentUser?.name ? `, ${currentUser.name.split(' ')[0]}` : ''}!
           </h1>
           <p className="text-slate-600 dark:text-slate-300">
             Welcome to your nutrition dashboard. Track your progress and meal plans.

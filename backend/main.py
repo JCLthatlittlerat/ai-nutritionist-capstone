@@ -59,6 +59,27 @@ with engine.connect() as conn:
     if 'goal' not in columns:
         conn.execute(text("ALTER TABLE users ADD COLUMN goal TEXT DEFAULT NULL"))
         conn.commit()
+    
+    if 'phone' not in columns:
+        conn.execute(text("ALTER TABLE users ADD COLUMN phone TEXT DEFAULT NULL"))
+        conn.commit()
+    if 'company' not in columns:
+        conn.execute(text("ALTER TABLE users ADD COLUMN company TEXT DEFAULT NULL"))
+        conn.commit()
+    if 'title' not in columns:
+        conn.execute(text("ALTER TABLE users ADD COLUMN title TEXT DEFAULT NULL"))
+        conn.commit()
+    if 'location' not in columns:
+        conn.execute(text("ALTER TABLE users ADD COLUMN location TEXT DEFAULT NULL"))
+        conn.commit()
+    if 'bio' not in columns:
+        conn.execute(text("ALTER TABLE users ADD COLUMN bio TEXT DEFAULT NULL"))
+        conn.commit()
+    
+    # Check if status column exists
+    if 'status' not in columns:
+        conn.execute(text("ALTER TABLE users ADD COLUMN status TEXT DEFAULT 'Active'"))
+        conn.commit()
 
 # CORS
 app.add_middleware(

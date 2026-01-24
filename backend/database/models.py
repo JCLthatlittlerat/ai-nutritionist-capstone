@@ -33,6 +33,12 @@ class User(Base):
     gender = Column(String, nullable=True)  # User's gender
     activity_level = Column(String, nullable=True)  # User's activity level
     goal = Column(String, nullable=True)  # User's fitness goal
+    phone = Column(String, nullable=True)
+    company = Column(String, nullable=True)
+    title = Column(String, nullable=True)
+    location = Column(String, nullable=True)
+    bio = Column(Text, nullable=True)
+    status = Column(String, default="Active")  # User's status (Active, Inactive, Completed)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

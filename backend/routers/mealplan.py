@@ -263,3 +263,76 @@ def delete_meal_plan(
     
     return {"message": "Meal plan deleted successfully"}
 
+
+@router.get("/pdf/{mealplan_id}")
+async def export_meal_plan_pdf(
+    mealplan_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Export a meal plan as a PDF file"""
+    # Fetch meal plan data
+    result = db.execute(
+        select(
+            MealPlan.id,
+            MealPlan.goal,
+            MealPlan.diet_type,
+            MealPlan.daily_calories,
+            MealPlan.macro_protein,
+            MealPlan.macro_carbs,
+            MealPlan.macro_fats
+        ).where(
+            MealPlan.id == mealplan_id,
+            MealPlan.user_id == current_user.id
+        )
+    )
+    meal_plan = result.first()
+    
+    if not meal_plan:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Meal plan not found"
+        )
+    
+    # Fetch history
+    history_result = db.execute(
+        select(MealHistory.day_number, MealHistory.meals_json)
+        .where(MealHistory.mealplan_id == mealplan_id)
+        .order_by(MealHistory.day_number)
+    )
+    
+    history_data = []
+    for hist in history_result:
+        history_data.append({
+            "day_number": hist.day_number,
+            "meals": json.loads(hist.meals_json)
+        })
+    
+    # Prepare data for PDF generator
+    meal_plan_data = {
+        "id": meal_plan.id,
+        "goal": meal_plan.goal,
+        "diet_type": meal_plan.diet_type,
+        "daily_calories": meal_plan.daily_calories,
+        "macros": {
+            "protein": meal_plan.macro_protein,
+            "carbs": meal_plan.macro_carbs,
+            "fats": meal_plan.macro_fats
+        },
+        "history": history_data,
+        "user_name": current_user.name
+    }
+    
+    # Generate PDF
+    temp_dir = tempfile.gettempdir()
+    filename = f"meal_plan_{mealplan_id}.pdf"
+    file_path = os.path.join(temp_dir, filename)
+    
+    pdf_path = generate_meal_plan_pdf(meal_plan_data, file_path)
+    
+    return FileResponse(
+        path=pdf_path,
+        filename=filename,
+        media_type="application/pdf"
+    )
+

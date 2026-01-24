@@ -33,6 +33,12 @@ class UserResponse(BaseModel):
     gender: Optional[str] = None
     activity_level: Optional[str] = None
     goal: Optional[str] = None
+    phone: Optional[str] = None
+    company: Optional[str] = None
+    title: Optional[str] = None
+    location: Optional[str] = None
+    bio: Optional[str] = None
+    status: str = "Active"
     created_at: datetime
     last_login: Optional[datetime]
 
@@ -87,3 +93,34 @@ class MealPlanFullResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class UserStatusUpdate(BaseModel):
+    status: str
+    is_active: bool = True
+
+
+class GoogleLoginRequest(BaseModel):
+    credential: str
+
+
+class UserProfileUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    company: Optional[str] = None
+    title: Optional[str] = None
+    location: Optional[str] = None
+    bio: Optional[str] = None
+    height: Optional[float] = None
+    weight: Optional[float] = None
+    age: Optional[int] = None
+    gender: Optional[str] = None
+    activity_level: Optional[str] = None
+    goal: Optional[str] = None
+    status: Optional[str] = None
+
+
+class PasswordChangeRequest(BaseModel):
+    current_password: str
+    new_password: str

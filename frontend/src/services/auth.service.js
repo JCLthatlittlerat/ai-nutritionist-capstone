@@ -14,6 +14,18 @@ const login = async (email, password, rememberMe = false) => {
   return response.data;
 };
 
+const googleLogin = async (credential, rememberMe = false) => {
+  const response = await api.post('/auth/google-login', { credential });
+  if (response.data.access_token) {
+    const storage = rememberMe ? localStorage : sessionStorage;
+    storage.setItem('token', response.data.access_token);
+    
+    const userResponse = await api.get('/auth/me');
+    storage.setItem('user', JSON.stringify(userResponse.data));
+  }
+  return response.data;
+};
+
 const register = async (userData) => {
   const response = await api.post('/auth/register', userData);
   return response;
@@ -92,7 +104,7 @@ const uploadProfilePicture = async (file) => {
 
 const getUserMealPlans = async () => {
   try {
-    const response = await api.get('/mealplan/user');
+    const response = await api.get('/api/mealplan/user');
     return response.data;
   } catch (error) {
     console.error('Error getting user meal plans:', error);
@@ -100,4 +112,4 @@ const getUserMealPlans = async () => {
   }
 };
 
-export default { login, register, logout, getCurrentUser, getToken, updateProfile, uploadProfilePicture, getUserMealPlans };
+export default { login, googleLogin, register, logout, getCurrentUser, getToken, updateProfile, uploadProfilePicture, getUserMealPlans };

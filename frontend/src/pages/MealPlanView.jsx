@@ -19,7 +19,7 @@ export function MealPlanView({ mealPlanId, onRegenerate, onNavigate }) {
       try {
         setLoading(true);
         setError(null);
-        const response = await api.get(`/mealplan/${mealPlanId}`);
+        const response = await api.get(`/api/mealplan/${mealPlanId}`);
         const data = response.data;
         
         setMealPlan(data.mealplan);
@@ -95,7 +95,7 @@ export function MealPlanView({ mealPlanId, onRegenerate, onNavigate }) {
 
   const handleExport = async () => {
     try {
-      const response = await api.get(`/mealplan/pdf/${mealPlanId}`, {
+      const response = await api.get(`/api/mealplan/pdf/${mealPlanId}`, {
         responseType: 'blob',
       });
       

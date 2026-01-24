@@ -151,7 +151,7 @@ export default function App() {
         <main className="flex-1 overflow-auto lg:pt-0 pt-16">
           {currentPage === 'dashboard' && (
             currentUser?.role === 'user' 
-              ? <UserDashboard onNavigate={handleNavigate} />
+              ? <UserDashboard onNavigate={handleNavigate} currentUser={currentUser} />
               : <Dashboard onNavigate={handleNavigate} currentUser={currentUser} />
           )}
           {(currentUser?.role !== 'user' && currentPage === 'create') && <CreateMealPlan onNavigate={handleNavigate} onGenerate={handleGeneratePlan} />}

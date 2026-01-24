@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, Mail, Phone, Calendar, Target, TrendingUp, Filter, MoreVertical, User, X } from 'lucide-react';
+import { Search, Plus, Mail, Phone, Calendar, Target, TrendingUp, Filter, MoreVertical, User, X, Eye, EyeOff, MapPin, Building, Briefcase, FileText } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
@@ -12,12 +12,17 @@ export function Clients({ onNavigate }) {
   const [clientsData, setClientsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddClientDialog, setShowAddClientDialog] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [newClientData, setNewClientData] = useState({
     name: '',
     email: '',
     phone: '',
+    password: '',
   });
   const [addClientError, setAddClientError] = useState('');
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [showClientDetail, setShowClientDetail] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   // Fetch clients data from the backend
   useEffect(() => {
@@ -42,7 +47,7 @@ export function Clients({ onNavigate }) {
             email: user.email,
             phone: user.phone || 'N/A',
             goal: user.goal || 'Not Set',
-            status: user.is_active ? 'Active' : 'Inactive',
+            status: user.status || (user.is_active ? 'Active' : 'Inactive'),
             joinDate: new Date(user.created_at).toLocaleDateString('en-US', { 
               year: 'numeric', 
               month: 'short', 
@@ -55,6 +60,14 @@ export function Clients({ onNavigate }) {
             totalCalories: 0,
             avatar: initials,
             avatarColor: getAvatarColor(user.id),
+            location: user.location || 'N/A',
+            company: user.company || 'N/A',
+            title: user.title || 'N/A',
+            bio: user.bio || '',
+            age: user.age || 'N/A',
+            gender: user.gender || 'N/A',
+            height: user.height ? `${user.height} cm` : 'N/A',
+            activityLevel: user.activity_level || 'N/A',
           };
         });
         
@@ -90,8 +103,8 @@ export function Clients({ onNavigate }) {
     setAddClientError('');
     
     // Validate required fields
-    if (!newClientData.name || !newClientData.email) {
-      setAddClientError('Name and email are required');
+    if (!newClientData.name || !newClientData.email || !newClientData.password) {
+      setAddClientError('Name, email and password are required');
       return;
     }
     
@@ -108,13 +121,13 @@ export function Clients({ onNavigate }) {
         name: newClientData.name,
         email: newClientData.email,
         phone: newClientData.phone,
-        password: 'TempPassword123!',
+        password: newClientData.password,
         role: 'user'
       });
       
       // Close dialog and reset form
       setShowAddClientDialog(false);
-      setNewClientData({ name: '', email: '', phone: '' });
+      setNewClientData({ name: '', email: '', phone: '', password: '' });
       
       // Refresh clients list
       const response = await api.get('/auth/users');
@@ -144,6 +157,14 @@ export function Clients({ onNavigate }) {
           totalCalories: 0,
           avatar: initials,
           avatarColor: getAvatarColor(user.id),
+          location: user.location || 'N/A',
+          company: user.company || 'N/A',
+          title: user.title || 'N/A',
+          bio: user.bio || '',
+          age: user.age || 'N/A',
+          gender: user.gender || 'N/A',
+          height: user.height ? `${user.height} cm` : 'N/A',
+          activityLevel: user.activity_level || 'N/A',
         };
       });
       
@@ -157,6 +178,40 @@ export function Clients({ onNavigate }) {
         setAddClientError(error.response?.data?.detail || 'Failed to add client. Please try again.');
       }
     }
+  };
+
+  const handleUpdateStatus = async (clientId, newStatus) => {
+    try {
+      setUpdatingStatus(true);
+      // Determine is_active based on status string
+      const isActive = newStatus === 'Active';
+      
+      await api.put(`/auth/users/${clientId}/status`, { 
+        status: newStatus,
+        is_active: isActive
+      });
+      
+      // Update local state
+      setClientsData(prev => prev.map(client => 
+        client.id === clientId ? { ...client, status: newStatus } : client
+      ));
+      
+      if (selectedClient && selectedClient.id === clientId) {
+        setSelectedClient(prev => ({ ...prev, status: newStatus }));
+      }
+      
+      alert('Client status updated successfully!');
+    } catch (error) {
+      console.error('Error updating client status:', error);
+      alert('Failed to update client status.');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  const openClientDetail = (client) => {
+    setSelectedClient(client);
+    setShowClientDetail(true);
   };
 
   // Filter clients based on search and status
@@ -291,7 +346,7 @@ export function Clients({ onNavigate }) {
             key={client.id}
             className="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer animate-scale-in"
             style={{ animationDelay: `${index * 0.05}s` }}
-            onClick={() => onNavigate('demo')}
+            onClick={() => openClientDetail(client)}
           >
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
@@ -386,7 +441,7 @@ export function Clients({ onNavigate }) {
                   size="sm"
                   onClick={() => {
                     setShowAddClientDialog(false);
-                    setNewClientData({ name: '', email: '', phone: '' });
+                    setNewClientData({ name: '', email: '', phone: '', password: '' });
                     setAddClientError('');
                   }}
                   className="h-8 w-8 p-0"
@@ -443,13 +498,35 @@ export function Clients({ onNavigate }) {
                   className="w-full"
                 />
               </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                  Password *
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={newClientData.password}
+                    onChange={(e) => setNewClientData({ ...newClientData, password: e.target.value })}
+                    className="w-full pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
               
               <div className="flex gap-3 pt-4">
                 <Button
                   variant="outline"
                   onClick={() => {
                     setShowAddClientDialog(false);
-                    setNewClientData({ name: '', email: '', phone: '' });
+                    setNewClientData({ name: '', email: '', phone: '', password: '' });
                     setAddClientError('');
                   }}
                   className="flex-1"
@@ -463,6 +540,193 @@ export function Clients({ onNavigate }) {
                   <Plus className="w-4 h-4 mr-2" />
                   Add Client
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Client Detail Dialog */}
+      {showClientDetail && selectedClient && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-2xl border-none shadow-2xl max-h-[90vh] overflow-y-auto">
+            <CardHeader className="sticky top-0 bg-white dark:bg-slate-800 z-10 border-b dark:border-slate-700">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className={`w-16 h-16 rounded-full ${selectedClient.avatarColor} flex items-center justify-center text-white font-bold text-2xl`}>
+                    {selectedClient.avatar}
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl">{selectedClient.name}</CardTitle>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge 
+                        variant={selectedClient.status === 'Active' ? 'default' : 'secondary'}
+                        className={selectedClient.status === 'Active' 
+                          ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300' 
+                          : selectedClient.status === 'Completed'
+                            ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
+                            : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                        }
+                      >
+                        {selectedClient.status}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowClientDetail(false)}
+                  className="h-8 w-8 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="py-6 space-y-8">
+              {/* Profile Info Section */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                    <User className="w-4 h-4 text-emerald-600" />
+                    Personal Information
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-500 dark:text-slate-400">Email:</span>
+                      <span className="text-slate-900 dark:text-white font-medium">{selectedClient.email}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-500 dark:text-slate-400">Phone:</span>
+                      <span className="text-slate-900 dark:text-white font-medium">{selectedClient.phone}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-500 dark:text-slate-400">Location:</span>
+                      <span className="text-slate-900 dark:text-white font-medium flex items-center gap-1">
+                        <MapPin className="w-3 h-3 text-slate-400" />
+                        {selectedClient.location}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-500 dark:text-slate-400">Company:</span>
+                      <span className="text-slate-900 dark:text-white font-medium flex items-center gap-1">
+                        <Building className="w-3 h-3 text-slate-400" />
+                        {selectedClient.company}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                    <Target className="w-4 h-4 text-emerald-600" />
+                    Fitness Goals & Metrics
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-500 dark:text-slate-400">Primary Goal:</span>
+                      <Badge variant="outline">{selectedClient.goal}</Badge>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-500 dark:text-slate-400">Current Weight:</span>
+                      <span className="text-slate-900 dark:text-white font-medium">{selectedClient.currentWeight}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-500 dark:text-slate-400">Height:</span>
+                      <span className="text-slate-900 dark:text-white font-medium">{selectedClient.height}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-500 dark:text-slate-400">Activity Level:</span>
+                      <span className="text-slate-900 dark:text-white font-medium">{selectedClient.activityLevel}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-500 dark:text-slate-400">Age:</span>
+                      <span className="text-slate-900 dark:text-white font-medium">{selectedClient.age}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-500 dark:text-slate-400">Gender:</span>
+                      <span className="text-slate-900 dark:text-white font-medium">{selectedClient.gender}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bio Section */}
+              {selectedClient.bio && (
+                <div className="pt-6 border-t dark:border-slate-700">
+                  <h3 className="font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-emerald-600" />
+                    Bio
+                  </h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                    {selectedClient.bio}
+                  </p>
+                </div>
+              )}
+
+              {/* Status Update Section */}
+              <div className="pt-6 border-t dark:border-slate-700">
+                <h3 className="font-semibold text-slate-900 dark:text-white mb-4">Update Client Status</h3>
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    variant={selectedClient.status === 'Active' ? 'default' : 'outline'}
+                    onClick={() => handleUpdateStatus(selectedClient.id, 'Active')}
+                    disabled={updatingStatus || selectedClient.status === 'Active'}
+                    className={selectedClient.status === 'Active' ? 'bg-emerald-600' : ''}
+                  >
+                    Set Active
+                  </Button>
+                  <Button
+                    variant={selectedClient.status === 'Inactive' ? 'default' : 'outline'}
+                    onClick={() => handleUpdateStatus(selectedClient.id, 'Inactive')}
+                    disabled={updatingStatus || selectedClient.status === 'Inactive'}
+                    className={selectedClient.status === 'Inactive' ? 'bg-slate-600' : ''}
+                  >
+                    Set Inactive
+                  </Button>
+                  <Button
+                    variant={selectedClient.status === 'Completed' ? 'default' : 'outline'}
+                    onClick={() => handleUpdateStatus(selectedClient.id, 'Completed')}
+                    disabled={updatingStatus || selectedClient.status === 'Completed'}
+                    className={selectedClient.status === 'Completed' ? 'bg-blue-600' : ''}
+                  >
+                    Set Completed
+                  </Button>
+                  <Button
+                    variant={selectedClient.status === 'On Hold' ? 'default' : 'outline'}
+                    onClick={() => handleUpdateStatus(selectedClient.id, 'On Hold')}
+                    disabled={updatingStatus || selectedClient.status === 'On Hold'}
+                    className={selectedClient.status === 'On Hold' ? 'bg-orange-600' : ''}
+                  >
+                    Set On Hold
+                  </Button>
+                  <Button
+                    variant={selectedClient.status === 'Archived' ? 'default' : 'outline'}
+                    onClick={() => handleUpdateStatus(selectedClient.id, 'Archived')}
+                    disabled={updatingStatus || selectedClient.status === 'Archived'}
+                    className={selectedClient.status === 'Archived' ? 'bg-red-600' : ''}
+                  >
+                    Archive
+                  </Button>
+                </div>
+              </div>
+
+              {/* Actions Section */}
+              <div className="pt-6 border-t dark:border-slate-700">
+                <h3 className="font-semibold text-slate-900 dark:text-white mb-4">Quick Actions</h3>
+                <div className="flex flex-wrap gap-3">
+                  <Button 
+                    className="bg-gradient-to-r from-emerald-600 to-teal-600"
+                    onClick={() => onNavigate('create')}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create New Meal Plan
+                  </Button>
+                  <Button variant="outline" onClick={() => onNavigate('demo')}>
+                    <TrendingUp className="w-4 h-4 mr-2" />
+                    View Progress Stats
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
