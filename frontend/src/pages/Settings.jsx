@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Switch } from '../components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import authService from '../services/auth.service';
+import api from '../services/api';
 
 export function Settings() {
   const [activeTab, setActiveTab] = useState('profile');
@@ -79,6 +80,14 @@ export function Settings() {
     sessionTimeout: true,
   });
 
+  // Password change state
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordError, setPasswordError] = useState('');
+
   const handleProfileUpdate = async () => {
     try {
       // Combine first and last name
@@ -112,9 +121,39 @@ export function Settings() {
     }
   };
 
-  const handlePasswordChange = () => {
-    // Handle password change
-    alert('Password change requested!');
+  const handlePasswordChange = async () => {
+    setPasswordError('');
+    
+    // Validate passwords match
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordError('New passwords do not match');
+      return;
+    }
+    
+    // Validate new password strength
+    if (passwordData.newPassword.length < 8) {
+      setPasswordError('Password must be at least 8 characters');
+      return;
+    }
+    
+    try {
+      await api.post('/auth/change-password', {
+        current_password: passwordData.currentPassword,
+        new_password: passwordData.newPassword
+      });
+      
+      // Clear password fields
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      
+      alert('Password updated successfully!');
+    } catch (error) {
+      console.error('Error updating password:', error);
+      setPasswordError(error.response?.data?.detail || 'Failed to update password. Please try again.');
+    }
   };
 
   const handleImageUpload = async (event) => {
@@ -450,6 +489,15 @@ export function Settings() {
               <CardDescription>Update your password to keep your account secure</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Error Message */}
+              {passwordError && (
+                <div className="p-3 rounded-lg bg-red-50 border border-red-100 dark:bg-red-900/20 dark:border-red-900/30">
+                  <p className="text-sm text-red-600 dark:text-red-400 text-center font-medium">
+                    {passwordError}
+                  </p>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="currentPassword">Current Password</Label>
                 <div className="relative">
@@ -459,6 +507,8 @@ export function Settings() {
                     type="password"
                     placeholder="Enter current password"
                     className="pl-10"
+                    value={passwordData.currentPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
                   />
                 </div>
               </div>
@@ -472,6 +522,8 @@ export function Settings() {
                     type="password"
                     placeholder="Enter new password"
                     className="pl-10"
+                    value={passwordData.newPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                   />
                 </div>
               </div>
@@ -485,6 +537,8 @@ export function Settings() {
                     type="password"
                     placeholder="Confirm new password"
                     className="pl-10"
+                    value={passwordData.confirmPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
                   />
                 </div>
               </div>

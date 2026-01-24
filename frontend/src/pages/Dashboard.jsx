@@ -70,14 +70,23 @@ export function Dashboard({ onNavigate, currentUser }) {
     },
   ];
 
+  const getCoachGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 18) return "Good Afternoon";
+    return "Good Evening";
+  };
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 animate-fade-in">
       {/* Header */}
       <div className="mb-6 sm:mb-8 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">
+            {getCoachGreeting()}{currentUser?.name ? `, ${currentUser.name.split(' ')[0]}` : ''}!
+          </h1>
           <p className="text-slate-600 dark:text-slate-300">
-            Welcome back{currentUser?.first_name ? `, ${currentUser.first_name}` : ''}! Here's your coaching overview.
+            Here's your coaching overview.
           </p>
         </div>
         <ThemeToggle />

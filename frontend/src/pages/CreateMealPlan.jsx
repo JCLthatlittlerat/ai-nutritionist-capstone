@@ -37,14 +37,33 @@ export function CreateMealPlan({ onGenerate }) {
         role: 'user'
       };
       
+      let clientCreated = false;
       // Try to register the client
       try {
         await api.post('/auth/register', clientData);
+        clientCreated = true;
       } catch (regError) {
         // If user already exists, that's okay - we'll continue
         if (!regError.response?.data?.detail?.includes('already exists')) {
           throw regError;
         }
+      }
+      
+      // If client was just created, log in as that client to create the meal plan
+      // Otherwise, the meal plan will be created for the logged-in coach
+      let originalToken = null;
+      if (clientCreated) {
+        // Save current coach token
+        originalToken = localStorage.getItem('token') || sessionStorage.getItem('token');
+        
+        // Login as the client
+        const loginResponse = await api.post('/auth/login', {
+          email: formData.clientEmail,
+          password: 'TempPassword123!'
+        });
+        
+        // Temporarily use client token
+        localStorage.setItem('temp_client_token', loginResponse.data.access_token);
       }
       
       // Create the meal plan
@@ -59,8 +78,25 @@ export function CreateMealPlan({ onGenerate }) {
         }
       };
       
-      const response = await api.post('/mealplan/', mealPlanData);
+      // Use client token if we just created them
+      const config = clientCreated ? {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('temp_client_token')}`
+        }
+      } : {};
+      
+      const response = await api.post('/mealplan/', mealPlanData, config);
       console.log('Meal plan created:', response.data);
+      
+      // Restore original token if we switched
+      if (originalToken) {
+        if (localStorage.getItem('token')) {
+          localStorage.setItem('token', originalToken);
+        } else {
+          sessionStorage.setItem('token', originalToken);
+        }
+        localStorage.removeItem('temp_client_token');
+      }
       
       // Success - navigate to the meal plan view
       setTimeout(() => {
