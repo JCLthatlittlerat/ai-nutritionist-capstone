@@ -27,14 +27,18 @@ from core.audit_logger import log_user_login, log_failed_login, log_user_registr
 from core.tfa_manager import TwoFactorAuth
 from passlib.context import CryptContext
 
-router = APIRouter(prefix="/auth", tags=["Auth"])
+router = APIRouter()
 
-# Rate limiter
-limiter = Limiter(key_func=get_remote_address)
+# dependency to get DB session
+def get_db():
+    yield from db_module.get_db()
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+@router.post("/register", response_model=schemas.UserOut, status_code=status.HTTP_201_CREATED)
+def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
+    # check if user exists
+    existing = db.query(models.User).filter(models.User.email == user_in.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)

@@ -1,27 +1,15 @@
-from pydantic import BaseModel
-from typing import Optional, List, Dict
-from datetime import datetime
+from pydantic import BaseModel, EmailStr, Field
 
-
-# ----------- USER AUTH SCHEMAS -----------
-
+# --- User schemas ---
 class UserCreate(BaseModel):
-    name: str
-    email: str
-    password: str
-    role: str = "user"  # Default to user, can be "user" or "coach"
+    email: EmailStr
+    password: str = Field(min_length=8)
+    full_name: str | None = None
 
-
-class UserLogin(BaseModel):
-    email: str
-    password: str
-
-
-class UserResponse(BaseModel):
+class UserOut(BaseModel):
     id: int
-    name: str
-    email: str
-    role: str
+    email: EmailStr
+    full_name: str | None = None
     is_active: bool
     is_verified: bool
     tfa_enabled: bool
@@ -46,50 +34,31 @@ class UserResponse(BaseModel):
         from_attributes = True
 
 
-# ----------- MEAL PLAN SCHEMAS -----------
+    model_config = {"from_attributes": True}
 
-class Macros(BaseModel):
-    protein: int
-    carbs: int
-    fats: int
+# --- Token schema ---
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
 
-
-class MealPlanCreate(BaseModel):
-    goal: str
-    daily_calories: int
-    diet_type: str
-    macros: Macros
-
-
-class MealPlanResponse(BaseModel):
-    id: int
-    goal: str
-    diet_type: str
-    daily_calories: int
-    macro_protein: int
-    macro_carbs: int
-    macro_fats: int
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
+class ClientCreate(BaseModel):
+ name: str
+ age: int
+ gender: str
+ height_cm: float
+ weight_kg: float
 
 
-# ----------- MEAL HISTORY SCHEMAS -----------
-
-class MealHistoryResponse(BaseModel):
-    id: int
-    day_number: int
-    meals_json: str
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
+class ClientResponse(ClientCreate):
+ id: int
+ model_config = {"from_attributes": True}
 
 
-class MealPlanFullResponse(BaseModel):
-    mealplan: MealPlanResponse
-    history: List[MealHistoryResponse]
+class NutritionInputSchema(BaseModel):
+ goal: str
+ activity_level: str
+ diet_type: str
+
 
     class Config:
         from_attributes = True
@@ -124,3 +93,8 @@ class UserProfileUpdate(BaseModel):
 class PasswordChangeRequest(BaseModel):
     current_password: str
     new_password: str
+class MacroResponse(BaseModel):
+ calories: float
+ protein_g: float
+ carbs_g: float
+ fats_g: float
